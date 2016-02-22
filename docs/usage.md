@@ -1,5 +1,4 @@
 ## Usage: How to query for authors
----
 
 This plugin can query for author data and can add authors via the author term. 
 It can also add a co-author to a post by using the 'author' term associated with the co-author.
@@ -13,14 +12,20 @@ The cli tool adds users to this equation. If a user exists then the user.id is u
 ### Endpoints
 ---
 #### Top level endpoints
-```http://example.com/wp-json/co-authors/v1/author-terms``` - **Returns all co-author terms**
-```http://example.com/wp-json/co-authors/v1/author-posts``` - **Returns all co-author posts**
-```http://example.com/wp-json/co-authors/v1/author-users``` - **Returns all co-author users**
+`http://example.com/wp-json/co-authors/v1/author-terms` - **Returns all co-author terms**
+
+`http://example.com/wp-json/co-authors/v1/author-posts` - **Returns all co-author posts**
+
+`http://example.com/wp-json/co-authors/v1/author-users` - **Returns all co-author users**
 
 #### Post related endpoints
-```http://example.com/wp-json/co-authors/v1/posts/60946/author-terms``` - **Returns all co-author terms associated with the post**
-```http://example.com/wp-json/co-authors/v1/posts/60946/author-posts``` - **Returns all co-author posts associated with the post**
-```http://example.com/wp-json/co-authors/v1/posts/60946/author-users``` - **Returns all co-author users associated with the post**
+`http://example.com/wp-json/co-authors/v1/posts/60946/author-terms` - **Returns all co-author terms associated with the post**
+
+`http://example.com/wp-json/co-authors/v1/posts/60946/author-posts` - **Returns all co-author posts associated with the post**
+
+`http://example.com/wp-json/co-authors/v1/posts/60946/author-users` - **Returns all co-author users associated with the post**
+
+___
 
 ### Examples
 ---
@@ -84,38 +89,27 @@ The cli tool adds users to this equation. If a user exists then the user.id is u
 }
 ```
 
+___
+
+
 ---
 ### Adding an author to a post
 ---
 ####Using author-terms
 You can use 2 methods for attaching an author to a post.
-1. Passing the author term ID via the REST URL:
-```http://example.com/wp-json/co-authors/v1/posts/60946/author-terms/875```
-2. Passing a JSON as the body of a RESTful Post:
-```http://example.com/wp-json/co-authors/v1/posts/60946/author-terms/``` with JSON in the body: ```{ "coauthor_id":875 }```
 
-#### Both will return:
-```
-{
-   "id":875,
-   "name":"west",
-   "slug":"cap-west",
-   "term_group ":0,
-   "term_taxonomy_id":875,
-   "taxonomy":"author",
-   "description":"west North West nwest 45 nwest@example.com",
-   "parent":0,
-   "count":327,
-   "_links":{
-      "about":[
-         {
-            "embeddable":true,
-            "href":"http:\/\/example.com\/wp-json\/co-authors\/v1\/author-terms\/875"
-         }
-      ]
-   }
-}
-```
+1. Passing the author term ID via the REST URL:
+`http://example.com/wp-json/co-authors/v1/posts/60946/author-terms/875`
+
+2. Passing a JSON as the body of a RESTful Post:
+`http://example.com/wp-json/co-authors/v1/posts/60946/author-terms/` with JSON in the body: `{ "coauthor_id":875 }`
+
 (FYI, the above author-term points to a real user with ID=45)
+___
+
 
 **TO-DO**: make the JSON, capable of adding multiple co-authors via an array: ```{ "coauthor_id":[913, 358, 875] }```
+
+
+___
+
