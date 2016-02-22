@@ -104,7 +104,30 @@ You can use 2 methods for attaching an author to a post.
 2. Passing a JSON as the body of a RESTful Post:
 `http://example.com/wp-json/co-authors/v1/posts/60946/author-terms/` with JSON in the body: `{ "coauthor_id":875 }`
 
-(FYI, the above author-term points to a real user with ID=45)
+#### Both will return:
+```
+{
+   "id":875,
+   "name":"west",
+   "slug":"cap-west",
+   "term_group ":0,
+   "term_taxonomy_id":875,
+   "taxonomy":"author",
+   "description":"west North West nwest 45 nwest@example.com",
+   "parent":0,
+   "count":327,
+   "_links":{
+      "about":[
+         {
+            "embeddable":true,
+            "href":"http:\/\/example.com\/wp-json\/co-authors\/v1\/author-terms\/875"
+         }
+      ]
+   }
+}
+```
+
+( FYI, the above author-term points to a real user with ID=45, as can be seen in the "description" )
 ___
 
 
