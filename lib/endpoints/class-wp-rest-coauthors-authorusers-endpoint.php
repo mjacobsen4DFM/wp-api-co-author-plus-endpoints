@@ -1,11 +1,11 @@
 <?php
 /**
- * Class Name: WP_REST_CoAuthors_AuthorPosts_Endpoint
+ * Class Name: WP_REST_CoAuthors_AuthorUsers_Endpoint
  * Author: Michael Jacobsen
  * Author URI: https://mjacobsen4dfm.wordpress.com/
  * License: GPL2+
  *
- * CoAuthors_AuthorPosts endpoint class.
+ * CoAuthors_AuthorUsers endpoint class.
  */
 
 if ( !class_exists( 'WP_REST_CoAuthors_AuthorUsers_Controller' ) ) {

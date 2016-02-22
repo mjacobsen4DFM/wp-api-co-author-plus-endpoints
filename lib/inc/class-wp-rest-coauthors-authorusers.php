@@ -1,11 +1,11 @@
 <?php
 /**
- * Class Name: WP_REST_CoAuthors_Authorusers
+ * Class Name: WP_REST_CoAuthors_AuthorUsers
  * Author: Michael Jacobsen
  * Author URI: https://mjacobsen4dfm.wordpress.com/
  * License: GPL2+
  *
- * CoAuthors_Authorusers base class.
+ * CoAuthors_AuthorUsers base class.
  */
 
 class WP_REST_CoAuthors_AuthorUsers extends WP_REST_Controller {
