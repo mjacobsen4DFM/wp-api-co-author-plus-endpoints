@@ -123,7 +123,7 @@ class WP_REST_CoAuthors_AuthorUsers extends WP_REST_Controller {
 		$terms = null;
 
 		// See if this request has a parent
-		if ( !empty ( $request['parent_id'] ) ) {
+		if ( ! empty( $request['parent_id'] ) ) {
 
 			$parent_id = (int) $request['parent_id'];
 
@@ -145,13 +145,13 @@ class WP_REST_CoAuthors_AuthorUsers extends WP_REST_Controller {
 			preg_match( $regex, $term->description, $matches );
 			$id = $matches[1];
 
-			if( !empty( $id ) ) {
+			if( ! empty( $id ) ) {
 				//This id matches the co_authors_id
 				break;
 			}
 		}
 
-		if ( !empty( $id ) ) {
+		if ( ! empty( $id ) ) {
 			// Get the user for this 'author' term
 			$author_user = get_user_by( 'id', $id );
 
@@ -164,7 +164,7 @@ class WP_REST_CoAuthors_AuthorUsers extends WP_REST_Controller {
 					return new WP_Error( 'rest_co_authors_get_user', __( 'Invalid authors id.' ), array( 'status' => 404 ) );
 				}
 
-				if ( !empty( $author_user_item ) ) {
+				if ( ! empty( $author_user_item ) ) {
 					return rest_ensure_response( $author_user_item );
 				}
 			}
@@ -183,11 +183,11 @@ class WP_REST_CoAuthors_AuthorUsers extends WP_REST_Controller {
 	 * @param WP_TERM $term
 	 * @return array $searchmap
 	 */
-	public function set_searchmap($term) {
+	public function set_searchmap( $term ) {
 		//This didn't work, some names break the pattern (i.e. "salisbury William S. Salisbury salisbury 87 bsalisbury@pioneerpress.com")
 		$ajax_search_fields = array( 'display_name', 'first_name', 'last_name', 'user_login', 'ID', 'user_email' );
-		$co_authors_values = explode(' ', $term->description);
-		if (5 == count($co_authors_values)) {
+		$co_authors_values = explode( ' ', $term->description );
+		if ( 5 == count( $co_authors_values ) ) {
 			//Sometimes the user doesn't have an email
 			//avoid index out of bounds error below
 			$co_authors_values[] = null;

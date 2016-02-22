@@ -8,10 +8,6 @@
  * CoAuthors_AuthorUsers endpoint class.
  */
 
-if ( !class_exists( 'WP_REST_CoAuthors_AuthorUsers_Controller' ) ) {
-	require_once dirname( __FILE__ ) . '/../controllers/class-wp-rest-coauthors-authorusers-controller.php';
-}
-
 class WP_REST_CoAuthors_AuthorUsers_Endpoint extends WP_REST_CoAuthors_AuthorUsers_Controller {
 	/**
 	 * Associated parent type.
@@ -64,7 +60,7 @@ class WP_REST_CoAuthors_AuthorUsers_Endpoint extends WP_REST_CoAuthors_AuthorUse
 	 * @return WP_Error|boolean
 	 */
 	public function get_items_permissions_check( $request ) {
-		if ( !empty( $request['parent_id'] )) {
+		if ( ! empty( $request['parent_id'] )) {
 			$parent = get_post( (int) $request['parent_id'] );
 
 			if ( empty( $parent ) || empty( $parent->ID ) ) {

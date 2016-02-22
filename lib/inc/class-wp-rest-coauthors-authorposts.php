@@ -69,7 +69,7 @@ class WP_REST_CoAuthors_AuthorPosts extends WP_REST_Controller {
 	 * @return WP_REST_Request|WP_Error, List of co-author objects data on success, WP_Error otherwise
 	 */
 	public function get_items( $request ) {
-		if ( !empty ( $request['parent_id'] ) ) {
+		if ( ! empty( $request['parent_id'] ) ) {
 			$parent_id = (int) $request['parent_id'];
 
 			//Get the 'author' terms for this post
@@ -125,7 +125,7 @@ class WP_REST_CoAuthors_AuthorPosts extends WP_REST_Controller {
 		$author_type = null;
 
 		// See if this request has a parent
-		if ( !empty ( $request['parent_id'] ) ) {
+		if ( ! empty( $request['parent_id'] ) ) {
 
 			$parent_id = (int) $request['parent_id'];
 
@@ -147,18 +147,18 @@ class WP_REST_CoAuthors_AuthorPosts extends WP_REST_Controller {
 			preg_match( $regex, $term->description, $matches );
 			$id = $matches[1];
 
-			if( !empty( $id ) ) {
+			if( ! empty( $id ) ) {
 				//This id matches the co_authors_id
 				break;
 			}
 		}
 
-		if( !empty( $id ) ) {
+		if( ! empty( $id ) ) {
 			//Get the post for this 'author' term
 			$author_post = get_post( $id );
 
 			// Ensure $author_post is a post and that it is an author
-			if ( 'WP_Post' == get_Class( $author_post ) || $author_post->post_type == $this->post_type) {
+			if ( 'WP_Post' == get_Class( $author_post ) || $author_post->post_type == $this->post_type ) {
 				// Enhance the object attributes for JSON
 				$author_post_item = $this->prepare_item_for_response( $author_post, $request );
 
@@ -166,7 +166,7 @@ class WP_REST_CoAuthors_AuthorPosts extends WP_REST_Controller {
 					return new WP_Error( 'rest_co_authors_get_post', __( 'Invalid authors id.' ), array( 'status' => 404 ) );
 				}
 
-				if ( !empty( $author_post_item ) ) {
+				if ( ! empty( $author_post_item ) ) {
 					return rest_ensure_response( $author_post_item );
 				}
 			}
@@ -185,11 +185,11 @@ class WP_REST_CoAuthors_AuthorPosts extends WP_REST_Controller {
 	 * @param WP_TERM $term
 	 * @return array $searchmap
 	 */
-	public function set_searchmap($term) {
+	public function set_searchmap( $term ) {
 		//This didn't work, some names break the pattern (i.e. "salisbury William S. Salisbury salisbury 87 bsalisbury@pioneerpress.com")
 		$ajax_search_fields = array( 'display_name', 'first_name', 'last_name', 'user_login', 'ID', 'user_email' );
-		$co_authors_values = explode(' ', $term->description);
-		if (5 == count($co_authors_values)) {
+		$co_authors_values = explode( ' ', $term->description );
+		if ( 5 == count( $co_authors_values ) ) {
 			//Sometimes the user doesn't have an email
 			//avoid index out of bounds error below
 			$co_authors_values[] = null;

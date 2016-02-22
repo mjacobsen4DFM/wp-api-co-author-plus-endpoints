@@ -70,7 +70,7 @@ class WP_REST_CoAuthors_AuthorTerms extends WP_REST_Controller {
 	 */
 	public function get_items( $request ) {
 		$author_terms = array();
-		if ( !empty ( $request['parent_id'] ) ) {
+		if ( ! empty( $request['parent_id'] ) ) {
 			$parent_id = (int) $request['parent_id'];
 
 			//Get the 'author' terms for this post
@@ -90,7 +90,7 @@ class WP_REST_CoAuthors_AuthorTerms extends WP_REST_Controller {
 			$author_terms[] = $this->prepare_response_for_collection( $term_item );
 		}
 
-		if ( !empty( $author_terms ) ) {
+		if ( ! empty( $author_terms ) ) {
 			return rest_ensure_response( $author_terms );
 		}
 
@@ -107,7 +107,7 @@ class WP_REST_CoAuthors_AuthorTerms extends WP_REST_Controller {
 	public function get_item( $request ) {
 		$term_id = (int) $request['id'];
 
-		if ( !empty ( $request['parent_id'] ) ) {
+		if ( ! empty( $request['parent_id'] ) ) {
 			$parent_id = (int) $request['parent_id'];
 
 			$terms = wp_get_object_terms( $parent_id, $this->taxonomy );
@@ -118,9 +118,9 @@ class WP_REST_CoAuthors_AuthorTerms extends WP_REST_Controller {
 				}
 			}
 		} else {
-			$author_term = get_term($term_id, $this->taxonomy );
+			$author_term = get_term( $term_id, $this->taxonomy );
 
-			if ( is_wp_error( $author_term )) {
+			if ( is_wp_error( $author_term ) ) {
 				return $author_term;
 			}
 
@@ -215,7 +215,7 @@ class WP_REST_CoAuthors_AuthorTerms extends WP_REST_Controller {
 
 			$response->set_status( 201 );
 			$data = $response->get_data();
-			$response->header( 'Location', rest_url( $this->namespace . '/' . $this->parent_base . '/' . $parent_id . '/' . $this->rest_base . '/' . $data["id"] ) );
+			$response->header( 'Location', rest_url( $this->namespace . '/' . $this->parent_base . '/' . $parent_id . '/' . $this->rest_base . '/' . $data['id'] ) );
 
 			$data = new stdClass();
 			$data->id = $author_term;
