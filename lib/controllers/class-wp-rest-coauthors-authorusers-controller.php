@@ -8,6 +8,10 @@
  * CoAuthors_AuthorUsers controller class.
  */
 
+if ( ! class_exists( 'WP_REST_CoAuthors_AuthorUsers' ) ) {
+	require_once dirname( __FILE__ ) . '/../inc/class-wp-rest-coauthors-authorusers.php';
+}
+
 abstract class WP_REST_CoAuthors_AuthorUsers_Controller extends WP_REST_Controller {
 	/**
 	 * Taxonomy for Co-Authors.

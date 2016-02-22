@@ -8,6 +8,10 @@
  * CoAuthors_AuthorTerms controller class.
  */
 
+if ( ! class_exists( 'WP_REST_CoAuthors_AuthorTerms' ) ) {
+	require_once dirname( __FILE__ ) . '/../inc/class-wp-rest-coauthors-authorterms.php';
+}
+
 abstract class WP_REST_CoAuthors_AuthorTerms_Controller extends WP_REST_Controller {
 	/**
 	 * Taxonomy for Co-Authors.

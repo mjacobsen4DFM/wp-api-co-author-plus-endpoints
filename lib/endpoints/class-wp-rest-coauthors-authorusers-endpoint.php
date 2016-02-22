@@ -8,6 +8,10 @@
  * CoAuthors_AuthorUsers endpoint class.
  */
 
+if ( !class_exists( 'WP_REST_CoAuthors_AuthorUsers_Controller' ) ) {
+	require_once dirname( __FILE__ ) . '/../controllers/class-wp-rest-coauthors-authorusers-controller.php';
+}
+
 class WP_REST_CoAuthors_AuthorUsers_Endpoint extends WP_REST_CoAuthors_AuthorUsers_Controller {
 	/**
 	 * Associated parent type.
