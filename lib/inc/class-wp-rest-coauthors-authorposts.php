@@ -10,6 +10,20 @@
 
 class WP_REST_CoAuthors_AuthorPosts extends WP_REST_Controller {
 	/**
+	 * Taxonomy for Co-Authors.
+	 *
+	 * @var string
+	 */
+	protected $taxonomy;
+
+	/**
+	 * Post_type for Co-Authors.
+	 *
+	 * @var string
+	 */
+	protected $post_type;
+
+	/**
 	 * The namespace of this controller's route.
 	 *
 	 * @var string
@@ -37,12 +51,14 @@ class WP_REST_CoAuthors_AuthorPosts extends WP_REST_Controller {
 	 */
 	protected $rest_base = null;
 
-	public function __construct( $namespace, $rest_base, $parent_base, $parent_type )
+	public function __construct( $namespace, $rest_base, $parent_base, $parent_type, $taxonomy, $post_type )
 	{
 		$this->namespace = $namespace;
 		$this->rest_base = $rest_base;
 		$this->parent_base = $parent_base;
 		$this->parent_type = $parent_type;
+		$this->taxonomy = $taxonomy;
+		$this->post_type = $post_type;
 	}
 
 
@@ -57,11 +73,11 @@ class WP_REST_CoAuthors_AuthorPosts extends WP_REST_Controller {
 			$parent_id = (int) $request['parent_id'];
 
 			//Get the 'author' terms for this post
-			$terms = wp_get_object_terms( $parent_id, 'author' );
+			$terms = wp_get_object_terms( $parent_id, $this->taxonomy );
 		}
 		else {
 			//Get all 'author' terms
-			$terms = get_terms('author' );
+			$terms = get_terms( $this->taxonomy );
 		}
 
 		foreach ( $terms as $term ) {
@@ -77,7 +93,7 @@ class WP_REST_CoAuthors_AuthorPosts extends WP_REST_Controller {
 			$author_post = get_post( $id );
 
 			// Make sure $author_post is a post and that it is an author
-			if ( 'WP_Post' == get_Class( $author_post ) && $author_post->post_type == 'guest-author' ) {
+			if ( 'WP_Post' == get_Class( $author_post ) && $author_post->post_type == $this->post_type ) {
 				// Enhance the object attributes for JSON
 				$author_post_item = $this->prepare_item_for_response( $author_post, $request );
 
@@ -104,7 +120,7 @@ class WP_REST_CoAuthors_AuthorPosts extends WP_REST_Controller {
 	 * @return WP_REST_Request|WP_Error, co-authors object data on success, WP_Error otherwise
 	 */
 	public function get_item( $request ) {
-		$co_authors_id = (int) $request['coauthor_id'];
+		$co_authors_id = (int) $request['id'];
 		$id = null;
 		$terms = null;
 		$author_type = null;
@@ -115,11 +131,11 @@ class WP_REST_CoAuthors_AuthorPosts extends WP_REST_Controller {
 			$parent_id = (int) $request['parent_id'];
 
 			//Get the 'author' terms for this post
-			$terms = wp_get_object_terms( $parent_id, 'author' );
+			$terms = wp_get_object_terms( $parent_id, $this->taxonomy );
 		}
 		else {
 			//Get all 'author' terms
-			$terms = get_terms( 'author' );
+			$terms = get_terms( $this->taxonomy );
 		}
 
 		// Ensure that the request co_authors_id is a co-author
@@ -144,7 +160,7 @@ class WP_REST_CoAuthors_AuthorPosts extends WP_REST_Controller {
 			$author_post = get_post( $id );
 
 			// Ensure $author_post is a post and that it is an author
-			if ( 'WP_Post' == get_Class( $author_post ) || $author_post->post_type == 'guest-author') {
+			if ( 'WP_Post' == get_Class( $author_post ) || $author_post->post_type == $this->post_type) {
 				// Enhance the object attributes for JSON
 				$author_post_item = $this->prepare_item_for_response( $author_post, $request );
 

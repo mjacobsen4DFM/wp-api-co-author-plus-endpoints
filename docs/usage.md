@@ -102,7 +102,7 @@ You can use 2 methods for attaching an author to a post.
 `http://example.com/wp-json/co-authors/v1/posts/60946/author-terms/875`
 
 2. Passing a JSON as the body of a RESTful Post:
-`http://example.com/wp-json/co-authors/v1/posts/60946/author-terms/` with JSON in the body: `{ "coauthor_id":875 }`
+`http://example.com/wp-json/co-authors/v1/posts/60946/author-terms/` with JSON in the body: `{ "id":875 }`
 
 #### Both will return:
 ```
@@ -131,7 +131,7 @@ You can use 2 methods for attaching an author to a post.
 ___
 
 
-**TO-DO**: make the JSON, capable of adding multiple co-authors via an array: ```{ "coauthor_id":[913, 358, 875] }```
+**TO-DO**: make the JSON, capable of adding multiple co-authors via an array: ```{ "id":[913, 358, 875] }```
 
 
 ___

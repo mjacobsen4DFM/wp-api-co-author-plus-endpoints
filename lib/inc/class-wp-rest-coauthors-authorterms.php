@@ -10,6 +10,20 @@
 
 class WP_REST_CoAuthors_AuthorTerms extends WP_REST_Controller {
 	/**
+	 * Taxonomy for Co-Authors.
+	 *
+	 * @var string
+	 */
+	protected $taxonomy;
+
+	/**
+	 * Post_type for Co-Authors.
+	 *
+	 * @var string
+	 */
+	protected $post_type;
+
+	/**
 	 * The namespace of this controller's route.
 	 *
 	 * @var string
@@ -37,12 +51,14 @@ class WP_REST_CoAuthors_AuthorTerms extends WP_REST_Controller {
 	 */
 	protected $rest_base = null;
 
-	public function __construct( $namespace, $rest_base, $parent_base, $parent_type )
+	public function __construct( $namespace, $rest_base, $parent_base, $parent_type, $taxonomy, $post_type )
 	{
 		$this->namespace = $namespace;
 		$this->rest_base = $rest_base;
 		$this->parent_base = $parent_base;
 		$this->parent_type = $parent_type;
+		$this->taxonomy = $taxonomy;
+		$this->post_type = $post_type;
 	}
 
 
@@ -58,11 +74,11 @@ class WP_REST_CoAuthors_AuthorTerms extends WP_REST_Controller {
 			$parent_id = (int) $request['parent_id'];
 
 			//Get the 'author' terms for this post
-			$terms = wp_get_object_terms( $parent_id, 'author' );
+			$terms = wp_get_object_terms( $parent_id, $this->taxonomy );
 		}
 		else {
 			//Get all 'author' terms
-			$terms = get_terms( 'author' );
+			$terms = get_terms( $this->taxonomy );
 		}
 
 		foreach ( $terms as $term ) {
@@ -90,12 +106,12 @@ class WP_REST_CoAuthors_AuthorTerms extends WP_REST_Controller {
 	 * @return WP_REST_Request|WP_Error, A co-author object data on success, WP_Error otherwise
 	 */
 	public function get_item( $request ) {
-		$term_id = (int) $request['coauthor_id'];
+		$term_id = (int) $request['id'];
 
 		if ( !empty ( $request['parent_id'] ) ) {
 			$parent_id = (int) $request['parent_id'];
 
-			$terms = wp_get_object_terms( $parent_id, 'author' );
+			$terms = wp_get_object_terms( $parent_id, $this->taxonomy );
 
 			foreach ( $terms as $term ) {
 				if ( $term->term_id == $term_id ) {
@@ -104,7 +120,7 @@ class WP_REST_CoAuthors_AuthorTerms extends WP_REST_Controller {
 			}
 		}
 		else {
-			$author_term = get_term($term_id, 'author' );
+			$author_term = get_term($term_id, $this->taxonomy );
 
 			if ( is_wp_error( $author_term )) {
 				return $author_term;
@@ -182,9 +198,9 @@ class WP_REST_CoAuthors_AuthorTerms extends WP_REST_Controller {
 	 */
 	public function create_item( $request ) {
 		$parent_id = (int) $request['parent_id'];
-		$author_term = (int) $request['coauthor_id']; 	//Currently only supports 1 author; send multiple posts to add multiple authors
+		$author_term = (int) $request['id']; 	//Currently only supports 1 author; send multiple posts to add multiple authors
 
-		$author_term_id = wp_set_object_terms( $parent_id, $author_term, 'author', true );
+		$author_term_id = wp_set_object_terms( $parent_id, $author_term, $this->taxonomy, true );
 
 		if ( is_wp_error( $author_term_id ) ) {
 			// There was an error somewhere and the terms couldn't be set.

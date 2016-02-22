@@ -14,6 +14,20 @@ if ( !class_exists( 'WP_REST_CoAuthors_AuthorUsers' ) ) {
 
 abstract class WP_REST_CoAuthors_AuthorUsers_Controller extends WP_REST_Controller {
 	/**
+	 * Taxonomy for Co-Authors.
+	 *
+	 * @var string
+	 */
+	protected $taxonomy;
+
+	/**
+	 * Post_type for Co-Authors.
+	 *
+	 * @var string
+	 */
+	protected $post_type;
+
+	/**
 	 * Associated co-author object type.
 	 *
 	 * @var WP_REST_CoAuthors_AuthorUsers
@@ -47,7 +61,10 @@ abstract class WP_REST_CoAuthors_AuthorUsers_Controller extends WP_REST_Controll
 			return;
 		}
 
-		$this->AuthorUser = new WP_REST_CoAuthors_AuthorUsers($this->namespace, $this->rest_base, $this->parent_base, $this->parent_type);
+		$this->taxonomy   = 'author';
+		$this->post_type  = 'guest-author';
+
+		$this->AuthorUser = new WP_REST_CoAuthors_AuthorUsers($this->namespace, $this->rest_base, $this->parent_base, $this->parent_type, $this->taxonomy, $this->post_type);
 	}
 
 	/**
@@ -68,7 +85,7 @@ abstract class WP_REST_CoAuthors_AuthorUsers_Controller extends WP_REST_Controll
 			'schema' => array( $this, 'get_public_item_schema' ),
 		) );
 
-		register_rest_route( $this->namespace, '/' . $this->rest_base . '/(?P<coauthor_id>[\d]+)', array(
+		register_rest_route( $this->namespace, '/' . $this->rest_base . '/(?P<id>[\d]+)', array(
 			array(
 				'methods'             => WP_REST_Server::READABLE,
 				'callback'            => array( $this->AuthorUser, 'get_item' ),
@@ -90,7 +107,7 @@ abstract class WP_REST_CoAuthors_AuthorUsers_Controller extends WP_REST_Controll
 			'schema' => array( $this, 'get_public_item_schema' ),
 		) );
 
-		register_rest_route( $this->namespace, '/' . $this->parent_base . '/(?P<parent_id>[\d]+)/' . $this->rest_base . '/(?P<coauthor_id>[\d]+)', array(
+		register_rest_route( $this->namespace, '/' . $this->parent_base . '/(?P<parent_id>[\d]+)/' . $this->rest_base . '/(?P<id>[\d]+)', array(
 			array(
 				'methods'             => WP_REST_Server::READABLE,
 				'callback'            => array( $this->AuthorUser, 'get_item' ),
@@ -103,28 +120,149 @@ abstract class WP_REST_CoAuthors_AuthorUsers_Controller extends WP_REST_Controll
 	}
 
 	/**
-	 * Get the schema, conforming to JSON Schema
+	 * Get the User's schema, conforming to JSON Schema
 	 *
 	 * @return array
 	 */
 	public function get_item_schema() {
+
 		$schema = array(
 			'$schema'    => 'http://json-schema.org/draft-04/schema#',
-			'title'      => 'authors',
+			'title'      => 'user',
 			'type'       => 'object',
-			/*
-			 * Base properties for every Post
-			 */
 			'properties' => array(
-				'id' => array(
-					'description' => __( 'Unique identifier for the object.' ),
+				'id'          => array(
+					'description' => __( 'Unique identifier for the resource.' ),
 					'type'        => 'integer',
+					'context'     => array( 'embed', 'view', 'edit' ),
+					'readonly'    => true,
+				),
+				'username'    => array(
+					'description' => __( 'Login name for the resource.' ),
+					'type'        => 'string',
+					'context'     => array( 'edit' ),
+					'required'    => true,
+					'arg_options' => array(
+						'sanitize_callback' => 'sanitize_user',
+					),
+				),
+				'name'        => array(
+					'description' => __( 'Display name for the resource.' ),
+					'type'        => 'string',
+					'context'     => array( 'embed', 'view', 'edit' ),
+					'arg_options' => array(
+						'sanitize_callback' => 'sanitize_text_field',
+					),
+				),
+				'first_name'  => array(
+					'description' => __( 'First name for the resource.' ),
+					'type'        => 'string',
+					'context'     => array( 'edit' ),
+					'arg_options' => array(
+						'sanitize_callback' => 'sanitize_text_field',
+					),
+				),
+				'last_name'   => array(
+					'description' => __( 'Last name for the resource.' ),
+					'type'        => 'string',
+					'context'     => array( 'edit' ),
+					'arg_options' => array(
+						'sanitize_callback' => 'sanitize_text_field',
+					),
+				),
+				'email'       => array(
+					'description' => __( 'The email address for the resource.' ),
+					'type'        => 'string',
+					'format'      => 'email',
+					'context'     => array( 'edit' ),
+					'required'    => true,
+				),
+				'url'         => array(
+					'description' => __( 'URL of the resource.' ),
+					'type'        => 'string',
+					'format'      => 'uri',
+					'context'     => array( 'embed', 'view', 'edit' ),
+				),
+				'description' => array(
+					'description' => __( 'Description of the resource.' ),
+					'type'        => 'string',
+					'context'     => array( 'embed', 'view', 'edit' ),
+					'arg_options' => array(
+						'sanitize_callback' => 'wp_filter_post_kses',
+					),
+				),
+				'link'        => array(
+					'description' => __( 'Author URL to the resource.' ),
+					'type'        => 'string',
+					'format'      => 'uri',
+					'context'     => array( 'embed', 'view', 'edit' ),
+					'readonly'    => true,
+				),
+				'nickname'    => array(
+					'description' => __( 'The nickname for the resource.' ),
+					'type'        => 'string',
+					'context'     => array( 'edit' ),
+					'arg_options' => array(
+						'sanitize_callback' => 'sanitize_text_field',
+					),
+				),
+				'slug'        => array(
+					'description' => __( 'An alphanumeric identifier for the resource.' ),
+					'type'        => 'string',
+					'context'     => array( 'embed', 'view', 'edit' ),
+					'arg_options' => array(
+						'sanitize_callback' => 'sanitize_title',
+					),
+				),
+				'registered_date' => array(
+					'description' => __( 'Registration date for the resource.' ),
+					'type'        => 'date-time',
 					'context'     => array( 'edit' ),
 					'readonly'    => true,
-				)
+				),
+				'roles'           => array(
+					'description' => __( 'Roles assigned to the resource.' ),
+					'type'        => 'array',
+					'context'     => array( 'edit' ),
+				),
+				'capabilities'    => array(
+					'description' => __( 'All capabilities assigned to the resource.' ),
+					'type'        => 'object',
+					'context'     => array( 'edit' ),
+				),
+				'extra_capabilities' => array(
+					'description' => __( 'Any extra capabilities assigned to the resource.' ),
+					'type'        => 'object',
+					'context'     => array( 'edit' ),
+					'readonly'    => true,
+				),
 			),
 		);
-		return $schema;
+
+		if ( get_option( 'show_avatars' ) ) {
+			$avatar_properties = array();
+
+			$avatar_sizes = rest_get_avatar_sizes();
+			foreach ( $avatar_sizes as $size ) {
+				$avatar_properties[ $size ] = array(
+					'description' => sprintf( __( 'Avatar URL with image size of %d pixels.' ), $size ),
+					'type'        => 'string',
+					'format'      => 'uri',
+					'context'     => array( 'embed', 'view', 'edit' ),
+				);
+			}
+
+			$schema['properties']['avatar_urls']  = array(
+				'description' => __( 'Avatar URLs for the resource.' ),
+				'type'        => 'object',
+				'context'     => array( 'embed', 'view', 'edit' ),
+				'readonly'    => true,
+				'properties'  => $avatar_properties,
+			);
+
+		}
+
+		return $this->add_additional_fields_schema( $schema );
 	}
 
 	/**
@@ -133,10 +271,8 @@ abstract class WP_REST_CoAuthors_AuthorUsers_Controller extends WP_REST_Controll
 	 * @return array
 	 */
 	public function get_collection_params() {
-		$params = parent::get_collection_params();
-		$new_params = array();
-		$new_params['context'] = $params['context'];
-		$new_params['context']['default'] = 'edit';
-		return $new_params;
+		$query_params = parent::get_collection_params();
+		$query_params['context']['default'] = 'view';
+		return $query_params;
 	}
 }
