@@ -75,8 +75,7 @@ class WP_REST_CoAuthors_AuthorTerms extends WP_REST_Controller {
 
 			//Get the 'author' terms for this post
 			$terms = wp_get_object_terms( $parent_id, $this->taxonomy );
-		}
-		else {
+		} else {
 			//Get all 'author' terms
 			$terms = get_terms( $this->taxonomy );
 		}
@@ -118,15 +117,14 @@ class WP_REST_CoAuthors_AuthorTerms extends WP_REST_Controller {
 					return $this->prepare_item_for_response( $term, $request );
 				}
 			}
-		}
-		else {
+		} else {
 			$author_term = get_term($term_id, $this->taxonomy );
 
 			if ( is_wp_error( $author_term )) {
 				return $author_term;
 			}
 
-			if ( $author_term->term_id == 0 ) {
+			if ( 0 == $author_term->term_id ) {
 				return new WP_Error( 'rest_authors_get_term', __( 'Invalid authors id.' ), array( 'status' => 404 ) );
 			}
 
@@ -145,15 +143,15 @@ class WP_REST_CoAuthors_AuthorTerms extends WP_REST_Controller {
 	 */
 	public function prepare_item_for_response( $data, $request ) {
 		$author_term = array(
-			'id'    => (int) $data->term_id,
-			'name'    => (string) $data->name,
-			'slug'    => (string) $data->slug,
-			'term_group '    => (int) $data->term_group ,
-			'term_taxonomy_id'    => (int) $data->term_taxonomy_id,
-			'taxonomy'    => (string) $data->taxonomy,
-			'description'    => (string) $data->description,
-			'parent'    => (int) $data->parent,
-			'count'    => (int) $data->count
+			'id'                => (int) $data->term_id,
+			'name'              => (string) $data->name,
+			'slug'              => (string) $data->slug,
+			'term_group '       => (int) $data->term_group ,
+			'term_taxonomy_id'  => (int) $data->term_taxonomy_id,
+			'taxonomy'          => (string) $data->taxonomy,
+			'description'       => (string) $data->description,
+			'parent'            => (int) $data->parent,
+			'count'             => (int) $data->count,
 		);
 
 		$response = rest_ensure_response( $author_term );
@@ -205,8 +203,7 @@ class WP_REST_CoAuthors_AuthorTerms extends WP_REST_Controller {
 		if ( is_wp_error( $author_term_id ) ) {
 			// There was an error somewhere and the terms couldn't be set.
 			return $author_term_id;
-		}
-		else {
+		} else {
 			// Success! The post's author was set.
 			//Verify that it is there.
 			$response = rest_ensure_response( $this->get_item( $request ) );

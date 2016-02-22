@@ -64,7 +64,9 @@ abstract class WP_REST_CoAuthors_AuthorUsers_Controller extends WP_REST_Controll
 		$this->taxonomy   = 'author';
 		$this->post_type  = 'guest-author';
 
-		$this->AuthorUser = new WP_REST_CoAuthors_AuthorUsers($this->namespace, $this->rest_base, $this->parent_base, $this->parent_type, $this->taxonomy, $this->post_type);
+		if ( class_exists('WP_REST_CoAuthors_AuthorUsers')  ) {
+			$this->AuthorUser = new WP_REST_CoAuthors_AuthorUsers($this->namespace, $this->rest_base, $this->parent_base, $this->parent_type, $this->taxonomy, $this->post_type);
+		}
 	}
 
 	/**

@@ -74,8 +74,7 @@ class WP_REST_CoAuthors_AuthorPosts extends WP_REST_Controller {
 
 			//Get the 'author' terms for this post
 			$terms = wp_get_object_terms( $parent_id, $this->taxonomy );
-		}
-		else {
+		} else {
 			//Get all 'author' terms
 			$terms = get_terms( $this->taxonomy );
 		}
@@ -132,8 +131,7 @@ class WP_REST_CoAuthors_AuthorPosts extends WP_REST_Controller {
 
 			//Get the 'author' terms for this post
 			$terms = wp_get_object_terms( $parent_id, $this->taxonomy );
-		}
-		else {
+		} else {
 			//Get all 'author' terms
 			$terms = get_terms( $this->taxonomy );
 		}
@@ -191,7 +189,7 @@ class WP_REST_CoAuthors_AuthorPosts extends WP_REST_Controller {
 		//This didn't work, some names break the pattern (i.e. "salisbury William S. Salisbury salisbury 87 bsalisbury@pioneerpress.com")
 		$ajax_search_fields = array( 'display_name', 'first_name', 'last_name', 'user_login', 'ID', 'user_email' );
 		$co_authors_values = explode(' ', $term->description);
-		if (count($co_authors_values) == 5) {
+		if (5 == count($co_authors_values)) {
 			//Sometimes the user doesn't have an email
 			//avoid index out of bounds error below
 			$co_authors_values[] = null;
@@ -220,11 +218,11 @@ class WP_REST_CoAuthors_AuthorPosts extends WP_REST_Controller {
 
 		if ( 'WP_Post' == get_Class( $data )  ) {
 			$author_post = array(
-				'id'    => (int) $data->ID,
-				'post_name'    => (string) $data->post_name,
-				'post_type'    => (string) $data->post_type,
+				'id'            => (int) $data->ID,
+				'post_name'     => (string) $data->post_name,
+				'post_type'     => (string) $data->post_type,
 				'post_title'    => (string) $data->post_title,
-				'post_date'    => (string) $data->post_date
+				'post_date'     => (string) $data->post_date,
 			);
 		}
 
