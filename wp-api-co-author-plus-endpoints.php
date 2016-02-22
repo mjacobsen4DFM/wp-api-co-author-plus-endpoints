@@ -17,42 +17,22 @@ function co_authors_rest_api_init(){
 		/**
 		 * WP_REST_CoAuthors_AuthorTerms classes.
 		 */
-		if ( ! class_exists( 'WP_REST_CoAuthors_AuthorTerms' ) ) {
-			require_once dirname( __FILE__ ) . '/lib/inc/class-wp-rest-coauthors-authorterms.php';
-		}
 		if ( ! class_exists( 'WP_REST_CoAuthors_AuthorTerms_Endpoint' ) ) {
 			require_once dirname( __FILE__ ) . '/lib/endpoints/class-wp-rest-coauthors-authorterms-endpoint.php';
 		}
-		if ( ! class_exists( 'WP_REST_CoAuthors_AuthorTerms_Controller' ) ) {
-			require_once dirname( __FILE__ ) . '/lib/controllers/class-wp-rest-coauthors-authorterms-controller.php';
-		}
-
 
 		/**
 		 * WP_REST_CoAuthors_AuthorPosts classes.
 		 */
-		if ( ! class_exists( 'WP_REST_CoAuthors_AuthorPosts' ) ) {
-			require_once dirname( __FILE__ ) . '/lib/inc/class-wp-rest-coauthors-authorposts.php';
-		}
 		if ( ! class_exists( 'WP_REST_CoAuthors_AuthorPosts_Endpoint' ) ) {
 			require_once dirname( __FILE__ ) . '/lib/endpoints/class-wp-rest-coauthors-authorposts-endpoint.php';
 		}
-		if ( ! class_exists( 'WP_REST_CoAuthors_AuthorPosts_Controller' ) ) {
-			require_once dirname( __FILE__ ) . '/lib/controllers/class-wp-rest-coauthors-authorposts-controller.php';
-		}
-
 
 		/**
 		 * WP_REST_CoAuthors_AuthorUsers classes.
 		 */
-		if ( ! class_exists( 'WP_REST_CoAuthors_AuthorUsers' ) ) {
-			require_once dirname( __FILE__ ) . '/lib/inc/class-wp-rest-coauthors-authorusers.php';
-		}
 		if ( ! class_exists( 'WP_REST_CoAuthors_AuthorUsers_Endpoint' ) ) {
 			require_once dirname( __FILE__ ) . '/lib/endpoints/class-wp-rest-coauthors-authorusers-endpoint.php';
-		}
-		if ( ! class_exists( 'WP_REST_CoAuthors_AuthorUsers_Controller' ) ) {
-			require_once dirname( __FILE__ ) . '/lib/controllers/class-wp-rest-coauthors-authorusers-controller.php';
 		}
 	}
 
