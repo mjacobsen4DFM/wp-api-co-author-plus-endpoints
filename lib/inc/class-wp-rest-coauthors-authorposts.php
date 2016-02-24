@@ -129,7 +129,7 @@ class WP_REST_CoAuthors_AuthorPosts extends WP_REST_Controller {
 	 * @return WP_REST_Request|WP_Error, co-authors object data on success, WP_Error otherwise
 	 */
 	public function get_item( $request ) {
-		$this->get_item_by( 'id', $request );
+		return $this->get_item_by( 'id', $request );
 	}
 
 	/**
