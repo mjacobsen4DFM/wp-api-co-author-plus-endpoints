@@ -127,7 +127,13 @@ class WP_REST_CoAuthors_AuthorPosts extends WP_REST_Controller {
 	 * @return WP_REST_Request|WP_Error, co-authors object data on success, WP_Error otherwise
 	 */
 	public function get_item( $request ) {
-		return $this->get_item_by( 'id', $request );
+		if ( ! empty($request['id']) ) {
+			return $this->get_item_by('id', $request);
+		}
+		if ( ! empty($request['display_name']) ) {
+			return $this->get_item_by('display_name', $request);
+		}
+		return new WP_Error( 'rest_no_route', __( 'No route was found matching the URL and request method: use discovery to identify correct query paths for author-posts.' ), array( 'status' => 404 ) );
 	}
 
 	/**

@@ -98,6 +98,17 @@ abstract class WP_REST_CoAuthors_AuthorUsers_Controller extends WP_REST_Controll
 			'schema' => array( $this, 'get_public_item_schema' ),
 		) );
 
+		register_rest_route( $this->namespace, '/' . $this->rest_base . '/display-name/(?P<display_name>[\w]+)', array(
+			array(
+				'methods'             => WP_REST_Server::READABLE,
+				'callback'            => array( $this->AuthorUser, 'get_item' ),
+				'permission_callback' => array( $this, 'get_items_permissions_check' ),
+				'args'                => $this->get_collection_params(),
+			),
+
+			'schema' => array( $this, 'get_public_item_schema' ),
+		) );
+
 		register_rest_route( $this->namespace, '/' . $this->parent_base . '/(?P<parent_id>[\d]+)/' . $this->rest_base, array(
 			array(
 				'methods'             => WP_REST_Server::READABLE,
