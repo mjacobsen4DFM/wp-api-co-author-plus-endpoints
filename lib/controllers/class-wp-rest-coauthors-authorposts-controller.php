@@ -14,19 +14,6 @@ if ( ! class_exists( 'WP_REST_CoAuthors_AuthorPosts' ) ) {
 
 abstract class WP_REST_CoAuthors_AuthorPosts_Controller extends WP_REST_Controller {
 	/**
-	 * Taxonomy for Co-Authors.
-	 *
-	 * @var string
-	 */
-	protected $taxonomy;
-
-	/**
-	 * Post_type for Co-Authors.
-	 *
-	 * @var string
-	 */
-	protected $post_type;
-	/**
 	 * Associated co-author object type.
 	 *
 	 * @var WP_REST_CoAuthors_AuthorPosts
@@ -39,6 +26,13 @@ abstract class WP_REST_CoAuthors_AuthorPosts_Controller extends WP_REST_Controll
 	 * @var string ("post")
 	 */
 	protected $parent_type = null;
+
+	/**
+	 * Associated parent type.
+	 *
+	 * @var string ("post")
+	 */
+	protected $post_type = null;
 
 	/**
 	 * Associated parent post type name.
@@ -60,12 +54,11 @@ abstract class WP_REST_CoAuthors_AuthorPosts_Controller extends WP_REST_Controll
 			return;
 		}
 
-		$this->taxonomy   = 'author';
-		$this->post_type  = 'guest-author';
-
 		if ( class_exists( 'WP_REST_CoAuthors_AuthorPosts' ) ) {
-			$this->AuthorPost = new WP_REST_CoAuthors_AuthorPosts( $this->namespace, $this->rest_base, $this->parent_base, $this->parent_type, $this->taxonomy, $this->post_type );
+			$this->AuthorPost = new WP_REST_CoAuthors_AuthorPosts( $this->namespace, $this->rest_base, $this->parent_base, $this->parent_type );
+			$this->post_type = $this->AuthorPost->coauthor_post_type;
 		}
+
 	}
 
 	/**
