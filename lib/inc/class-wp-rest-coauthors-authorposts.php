@@ -143,9 +143,12 @@ class WP_REST_CoAuthors_AuthorPosts extends WP_REST_Controller {
 	public function get_item_by( $key, $request ) {
 		$co_authors_value = $request[$key];
 		$value = '';
+		if ( 'id' == $key ) {
+			$key = 'ID';
+		}
 
 		// See if this request has a parent
-		if ( ! empty( $request['parent_id'] ) && ( 'id' == $key ) ) {
+		if ( ! empty( $request['parent_id'] ) ) {
 			$parent_id = (int) $request['parent_id'];
 			$authors = get_coauthors($parent_id);
 
@@ -157,7 +160,7 @@ class WP_REST_CoAuthors_AuthorPosts extends WP_REST_Controller {
 					$author_post_item = $this->prepare_item_for_response( $author, $request );
 
 					if ( is_wp_error( $author_post_item ) ) {
-						return new WP_Error( 'rest_co_authors_get_post', __( 'Invalid authors ' . $key . '.' ), array( 'status' => 404 ) );
+						return new WP_Error( 'rest_co_authors_get_post', __( 'Invalid authors ' . $author->$key . '.' ), array( 'status' => 404 ) );
 					}
 
 					if ( ! empty( $author_post_item ) ) {
