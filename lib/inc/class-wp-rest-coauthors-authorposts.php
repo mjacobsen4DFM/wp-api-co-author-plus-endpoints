@@ -130,8 +130,8 @@ class WP_REST_CoAuthors_AuthorPosts extends WP_REST_Controller {
 		if ( ! empty($request['id']) ) {
 			return $this->get_item_by('id', $request);
 		}
-		if ( ! empty($request['display_name']) ) {
-			return $this->get_item_by('display_name', $request);
+		if ( ! empty($request['user_login']) ) {
+			return $this->get_item_by('user_login', $request);
 		}
 		return new WP_Error( 'rest_no_route', __( 'No route was found matching the URL and request method: use discovery to identify correct query paths for author-posts.' ), array( 'status' => 404 ) );
 	}

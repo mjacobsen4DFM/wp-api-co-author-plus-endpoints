@@ -97,7 +97,7 @@ abstract class WP_REST_CoAuthors_AuthorPosts_Controller extends WP_REST_Controll
 			'schema' => array( $this, 'get_public_item_schema' ),
 		) );
 
-		register_rest_route( $this->namespace, '/' . $this->rest_base . '/display-name/(?P<display_name>[\w]+)', array(
+		register_rest_route( $this->namespace, '/' . $this->rest_base . '/user-login/(?P<user_login>[\w]+)', array(
 			array(
 				'methods'             => WP_REST_Server::READABLE,
 				'callback'            => array( $this->AuthorUser, 'get_item' ),
