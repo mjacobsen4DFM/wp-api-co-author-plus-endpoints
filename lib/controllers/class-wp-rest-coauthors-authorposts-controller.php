@@ -100,7 +100,7 @@ abstract class WP_REST_CoAuthors_AuthorPosts_Controller extends WP_REST_Controll
 		register_rest_route( $this->namespace, '/' . $this->rest_base . '/user-login/(?P<user_login>[\w]+)', array(
 			array(
 				'methods'             => WP_REST_Server::READABLE,
-				'callback'            => array( $this->AuthorUser, 'get_item' ),
+				'callback'            => array( $this->AuthorPost, 'get_item' ),
 				'permission_callback' => array( $this, 'get_items_permissions_check' ),
 				'args'                => $this->get_collection_params(),
 			),
