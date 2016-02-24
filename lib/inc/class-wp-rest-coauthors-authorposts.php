@@ -86,6 +86,7 @@ class WP_REST_CoAuthors_AuthorPosts extends WP_REST_Controller {
 	 */
 	public function get_items( $request ) {
 
+		$authors = array();
 		if ( ! empty( $request['parent_id'] ) ) {
 			$parent_id = (int) $request['parent_id'];
 
@@ -93,19 +94,17 @@ class WP_REST_CoAuthors_AuthorPosts extends WP_REST_Controller {
 			$authors = get_coauthors($parent_id);
 		} else {
 			//Get all coauthor posts
-			$author_terms = get_terms( $this->CoAuthors_Plus->coauthor_taxonomy );
-			$authors = array();
-			foreach ( $author_terms as $author_term ) {
-				if ( false === ( $coauthor = $this->CoAuthors_Plus->get_coauthor_by( 'user_login', $author_term->name ) ) ) {
+			//Bastardized from Co-Authors-Plus/template-tags.php (used there for users; changed here to authors)
+			$author_terms = get_terms($this->CoAuthors_Plus->coauthor_taxonomy);
+			foreach ($author_terms as $author_term) {
+				$coauthor = $this->CoAuthors_Guest_Authors->get_guest_author_by('user_login', $author_term->name, true);
+
+				if ( ! $coauthor ) {
 					continue;
 				}
 
-				$authors[ $author_term->name ] = $coauthor;
-
-				$authors[ $author_term->name ]->post_count = $author_term->count;
+				$authors[] = $coauthor;
 			}
-
-			$authors = apply_filters( 'coauthors_wp_list_authors_array', $authors );
 		}
 
 
