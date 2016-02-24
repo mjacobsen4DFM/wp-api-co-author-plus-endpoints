@@ -14,19 +14,6 @@ if ( ! class_exists( 'WP_REST_CoAuthors_AuthorPosts' ) ) {
 
 abstract class WP_REST_CoAuthors_AuthorPosts_Controller extends WP_REST_Controller {
 	/**
-	 * Taxonomy for Co-Authors.
-	 *
-	 * @var string
-	 */
-	protected $taxonomy;
-
-	/**
-	 * Post_type for Co-Authors.
-	 *
-	 * @var string
-	 */
-	protected $post_type;
-	/**
 	 * Associated co-author object type.
 	 *
 	 * @var WP_REST_CoAuthors_AuthorPosts
@@ -39,6 +26,13 @@ abstract class WP_REST_CoAuthors_AuthorPosts_Controller extends WP_REST_Controll
 	 * @var string ("post")
 	 */
 	protected $parent_type = null;
+
+	/**
+	 * Associated parent type.
+	 *
+	 * @var string ("post")
+	 */
+	protected $coauthor_post_type = null;
 
 	/**
 	 * Associated parent post type name.
@@ -60,12 +54,11 @@ abstract class WP_REST_CoAuthors_AuthorPosts_Controller extends WP_REST_Controll
 			return;
 		}
 
-		$this->taxonomy   = 'author';
-		$this->post_type  = 'guest-author';
-
 		if ( class_exists( 'WP_REST_CoAuthors_AuthorPosts' ) ) {
-			$this->AuthorPost = new WP_REST_CoAuthors_AuthorPosts( $this->namespace, $this->rest_base, $this->parent_base, $this->parent_type, $this->taxonomy, $this->post_type );
+			$this->AuthorPost = new WP_REST_CoAuthors_AuthorPosts( $this->namespace, $this->rest_base, $this->parent_base, $this->parent_type );
+			$this->coauthor_post_type = $this->AuthorPost->coauthor_post_type;
 		}
+
 	}
 
 	/**
@@ -87,6 +80,28 @@ abstract class WP_REST_CoAuthors_AuthorPosts_Controller extends WP_REST_Controll
 		) );
 
 		register_rest_route( $this->namespace, '/' . $this->rest_base . '/(?P<id>[\d]+)', array(
+			array(
+				'methods'             => WP_REST_Server::READABLE,
+				'callback'            => array( $this->AuthorPost, 'get_item' ),
+				'permission_callback' => array( $this, 'get_items_permissions_check' ),
+				'args'                => $this->get_collection_params(),
+			),
+
+			'schema' => array( $this, 'get_public_item_schema' ),
+		) );
+
+		register_rest_route( $this->namespace, '/' . $this->rest_base . '/user-login/(?P<user_login>[\w\-]+)', array(
+			array(
+				'methods'             => WP_REST_Server::READABLE,
+				'callback'            => array( $this->AuthorPost, 'get_item' ),
+				'permission_callback' => array( $this, 'get_items_permissions_check' ),
+				'args'                => $this->get_collection_params(),
+			),
+
+			'schema' => array( $this, 'get_public_item_schema' ),
+		) );
+
+		register_rest_route( $this->namespace, '/' . $this->rest_base . '/display-name/(?P<display_name>[\w\-\s]+)', array(
 			array(
 				'methods'             => WP_REST_Server::READABLE,
 				'callback'            => array( $this->AuthorPost, 'get_item' ),
@@ -129,7 +144,7 @@ abstract class WP_REST_CoAuthors_AuthorPosts_Controller extends WP_REST_Controll
 
 		$schema = array(
 			'$schema'    => 'http://json-schema.org/draft-04/schema#',
-			'title'      => $this->post_type,
+			'title'      => $this->coauthor_post_type,
 			'type'       => 'object',
 			/*
 			 * Base properties for every Post.
@@ -220,7 +235,7 @@ abstract class WP_REST_CoAuthors_AuthorPosts_Controller extends WP_REST_Controll
 			),
 		);
 
-		$post_type_obj = get_post_type_object( $this->post_type );
+		$post_type_obj = get_post_type_object( $this->coauthor_post_type );
 		if ( $post_type_obj->hierarchical ) {
 			$schema['properties']['parent'] = array(
 				'description' => __( 'The id for the parent of the object.' ),
@@ -269,9 +284,9 @@ abstract class WP_REST_CoAuthors_AuthorPosts_Controller extends WP_REST_Controll
 			),
 		);
 		foreach ( $post_type_attributes as $attribute ) {
-			if ( isset( $fixed_schemas[ $this->post_type ] ) && ! in_array( $attribute, $fixed_schemas[ $this->post_type ] ) ) {
+			if ( isset( $fixed_schemas[ $this->coauthor_post_type ] ) && ! in_array( $attribute, $fixed_schemas[ $this->coauthor_post_type ] ) ) {
 				continue;
-			} elseif ( ! in_array( $this->post_type, array_keys( $fixed_schemas ) ) && ! post_type_supports( $this->post_type, $attribute ) ) {
+			} elseif ( ! in_array( $this->coauthor_post_type, array_keys( $fixed_schemas ) ) && ! post_type_supports( $this->coauthor_post_type, $attribute ) ) {
 				continue;
 			}
 
@@ -388,7 +403,7 @@ abstract class WP_REST_CoAuthors_AuthorPosts_Controller extends WP_REST_Controll
 			}
 		}
 
-		if ( 'post' === $this->post_type ) {
+		if ( 'post' === $this->coauthor_post_type ) {
 			$schema['properties']['sticky'] = array(
 				'description' => __( 'Whether or not the object should be treated as sticky.' ),
 				'type'        => 'boolean',
@@ -396,7 +411,7 @@ abstract class WP_REST_CoAuthors_AuthorPosts_Controller extends WP_REST_Controll
 			);
 		}
 
-		if ( 'page' === $this->post_type ) {
+		if ( 'page' === $this->coauthor_post_type ) {
 			$schema['properties']['template'] = array(
 				'description' => __( 'The theme file to use to display the object.' ),
 				'type'        => 'string',
@@ -405,7 +420,7 @@ abstract class WP_REST_CoAuthors_AuthorPosts_Controller extends WP_REST_Controll
 			);
 		}
 
-		$taxonomies = wp_list_filter( get_object_taxonomies( $this->post_type, 'objects' ), array( 'show_in_rest' => true ) );
+		$taxonomies = wp_list_filter( get_object_taxonomies( $this->coauthor_post_type, 'objects' ), array( 'show_in_rest' => true ) );
 		foreach ( $taxonomies as $taxonomy ) {
 			$base = ! empty( $taxonomy->rest_base ) ? $taxonomy->rest_base : $taxonomy->name;
 			$schema['properties'][ $base ] = array(

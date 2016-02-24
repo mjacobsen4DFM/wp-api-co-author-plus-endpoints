@@ -14,6 +14,13 @@ if ( ! class_exists( 'WP_REST_CoAuthors_AuthorUsers' ) ) {
 
 abstract class WP_REST_CoAuthors_AuthorUsers_Controller extends WP_REST_Controller {
 	/**
+	 * Associated co-author object type.
+	 *
+	 * @var WP_REST_CoAuthors_AuthorUsers
+	 */
+	protected $AuthorUser = null;
+
+	/**
 	 * Taxonomy for Co-Authors.
 	 *
 	 * @var string
@@ -25,21 +32,7 @@ abstract class WP_REST_CoAuthors_AuthorUsers_Controller extends WP_REST_Controll
 	 *
 	 * @var string
 	 */
-	protected $post_type;
-
-	/**
-	 * Associated co-author object type.
-	 *
-	 * @var WP_REST_CoAuthors_AuthorUsers
-	 */
-	protected $AuthorUser = null;
-
-	/**
-	 * Associated parent type.
-	 *
-	 * @var string ("post")
-	 */
-	protected $parent_type = null;
+	protected $coauthor_post_type;
 
 	/**
 	 * Associated parent post type name.
@@ -61,11 +54,9 @@ abstract class WP_REST_CoAuthors_AuthorUsers_Controller extends WP_REST_Controll
 			return;
 		}
 
-		$this->taxonomy   = 'author';
-		$this->post_type  = 'guest-author';
-
 		if ( class_exists( 'WP_REST_CoAuthors_AuthorUsers' ) ) {
-			$this->AuthorUser = new WP_REST_CoAuthors_AuthorUsers( $this->namespace, $this->rest_base, $this->parent_base, $this->parent_type, $this->taxonomy, $this->post_type );
+			$this->AuthorUser = new WP_REST_CoAuthors_AuthorUsers( $this->namespace, $this->rest_base, $this->parent_base, $this->parent_type );
+			$this->coauthor_post_type = $this->AuthorUser->coauthor_post_type;
 		}
 	}
 

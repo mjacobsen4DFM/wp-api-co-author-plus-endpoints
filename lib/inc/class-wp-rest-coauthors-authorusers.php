@@ -10,18 +10,32 @@
 
 class WP_REST_CoAuthors_AuthorUsers extends WP_REST_Controller {
 	/**
-	 * Taxonomy for Co-Authors.
+	 * Post_type for Co-Authors.
 	 *
 	 * @var string
 	 */
-	protected $taxonomy;
+	protected $CoAuthors_Plus;
 
 	/**
 	 * Post_type for Co-Authors.
 	 *
 	 * @var string
 	 */
-	protected $post_type;
+	protected $CoAuthors_Guest_Authors;
+
+	/**
+	 * Taxonomy for Co-Authors.
+	 *
+	 * @var string
+	 */
+	public $coauthor_taxonomy;
+
+	/**
+	 * Post_type for Co-Authors.
+	 *
+	 * @var string
+	 */
+	public $coauthor_post_type;
 
 	/**
 	 * The namespace of this controller's route.
@@ -51,14 +65,16 @@ class WP_REST_CoAuthors_AuthorUsers extends WP_REST_Controller {
 	 */
 	protected $rest_base = null;
 
-	public function __construct( $namespace, $rest_base, $parent_base, $parent_type, $taxonomy, $post_type )
+	public function __construct( $namespace, $rest_base, $parent_base, $parent_type )
 	{
 		$this->namespace = $namespace;
 		$this->rest_base = $rest_base;
 		$this->parent_base = $parent_base;
 		$this->parent_type = $parent_type;
-		$this->taxonomy = $taxonomy;
-		$this->post_type = $post_type;
+		$this->CoAuthors_Plus = new coauthors_plus ();
+		$this->CoAuthors_Guest_Authors = new CoAuthors_Guest_Authors();
+		$this->coauthor_taxonomy = $this->CoAuthors_Plus->coauthor_taxonomy;
+		$this->coauthor_post_type = $this->CoAuthors_Guest_Authors->post_type;
 	}
 
 
@@ -69,41 +85,51 @@ class WP_REST_CoAuthors_AuthorUsers extends WP_REST_Controller {
 	 * @return WP_REST_Request|WP_Error, List of co-author objects data on success, WP_Error otherwise
 	 */
 	public function get_items( $request ) {
+
+		$authors = array();
+
+		//Populate the $author_terms(), so that we can pull out the applicable 'author-users'
 		if ( ! empty ( $request['parent_id'] ) ) {
 
 			$parent_id = (int) $request['parent_id'];
 
 			//Get the 'author' terms for this post
-			$terms = wp_get_object_terms( $parent_id, $this->taxonomy );
+			$author_terms = wp_get_object_terms( $parent_id, $this->coauthor_taxonomy );
 		} else {
 			//Get all 'author' terms
-			$terms = get_terms( $this->taxonomy );
+			$author_terms = get_terms( $this->coauthor_taxonomy );
 		}
 
-		foreach ( $terms as $term ) {
-			//create a map to look up the metadata in the term->description
-			//$searchmap = $this->set_searchmap($term); //Fail: see function
 
-			//Since the co-authors method didn't work, trying regex for the int value of the ID
-			$regex = "/\\b(\\d+)\\b/";
-			preg_match( $regex, $term->description, $matches );
-			$id = $matches[1];
+		//We have terms, go get the users
+		foreach ($author_terms as $author_term) {
 
-			// Get the user for this 'author' term
-			$user = get_user_by( 'id', $id );
+			//Get the user that matches the term
+			$coauthor = $this->CoAuthors_Plus->get_coauthor_by('user_login', $author_term->name, true);
 
-			if ( 'WP_User' == get_Class( $user ) ) {
-				// Enhance the object attributes for JSON
-				$author_user = $this->prepare_item_for_response( $user, $request );
+			if ( ! $coauthor ) {
+				continue;
+			}
 
-				if ( is_wp_error( $author_user ) ) {
-					continue;
-				}
+			$authors[] = $coauthor;
+		}
 
-				$author_users[] = $this->prepare_response_for_collection( $author_user );
+
+		foreach ( $authors as $author ) {
+
+			$author_post_item = $this->prepare_item_for_response( $author, $request );
+
+			if ( is_wp_error( $author_post_item ) ) {
+				continue;
+			}
+
+			if ( ! empty( $author_post_item ) ) {
+				$author_users[] = $this->prepare_response_for_collection( $author_post_item );
 			}
 		}
 
+
+		//Collected the users, return them
 		if ( ! empty( $author_users ) ) {
 			return rest_ensure_response( $author_users );
 		}
@@ -111,117 +137,111 @@ class WP_REST_CoAuthors_AuthorUsers extends WP_REST_Controller {
 		return new WP_Error( 'rest_co_authors_get_users', __( 'Invalid authors id.' ), array( 'status' => 404 ) );
 	}
 
+
 	/**
-	 * Retrieve co-authors user object.
+	 * Retrieve guest-authors object.
+	 * (used by create_item() to immediately confirm creation)
 	 *
 	 * @param WP_REST_Request $request
 	 * @return WP_REST_Request|WP_Error, co-authors object data on success, WP_Error otherwise
 	 */
 	public function get_item( $request ) {
-		$co_authors_id = (int) $request['id'];
-		$id = null;
-		$terms = null;
-
-		// See if this request has a parent
-		if ( ! empty( $request['parent_id'] ) ) {
-
-			$parent_id = (int) $request['parent_id'];
-
-			//Get the 'author' terms for this post
-			$terms = wp_get_object_terms( $parent_id, $this->taxonomy );
-		} else {
-			//Get all 'author' terms
-			$terms = get_terms( $this->taxonomy );
+		if ( ! empty($request['id']) ) {
+			return $this->get_item_by('id', $request);
 		}
-
-		// Ensure that the request co_authors_id is a co-author
-		// if none of its author terms has this ID it is invalid
-		foreach ( $terms as $term ) {
-			//create a map to look up the metadata in the term->description
-			//$searchmap = $this->set_searchmap($term); //Fail: see function
-
-			//Since the $searchmap method didn't work, trying regex for the int value of the ID
-			$regex = "/\\b(" . $co_authors_id . ")\\b/";
-			preg_match( $regex, $term->description, $matches );
-			$id = $matches[1];
-
-			if( ! empty( $id ) ) {
-				//This id matches the co_authors_id
-				break;
-			}
+		if ( ! empty($request['user_login']) ) {
+			return $this->get_item_by('user_login', $request);
 		}
-
-		if ( ! empty( $id ) ) {
-			// Get the user for this 'author' term
-			$author_user = get_user_by( 'id', $id );
-
-			// Ensure $author_user is a user (not false)
-			if ( 'WP_User' == get_Class( $author_user ) ) {
-				// Enhance the object attributes for JSON
-				$author_user_item = $this->prepare_item_for_response( $author_user, $request );
-
-				if ( is_wp_error( $author_user_item ) ) {
-					return new WP_Error( 'rest_co_authors_get_user', __( 'Invalid authors id.' ), array( 'status' => 404 ) );
-				}
-
-				if ( ! empty( $author_user_item ) ) {
-					return rest_ensure_response( $author_user_item );
-				}
-			}
+		if ( ! empty($request['display_name']) ) {
+			return $this->get_item_by('display_name', $request);
 		}
-
-		return new WP_Error( 'rest_co_authors_get_users', __( 'Invalid authors id.' ), array( 'status' => 404 ) );
+		return new WP_Error( 'rest_no_route', __( 'No route was found matching the URL and request method: use discovery to identify correct query paths for author-posts.' ), array( 'status' => 404 ) );
 	}
-
 
 
 	/**
-	 * Create a map to search the description field
-	 * (used by create_item() to immediately confirm creation)
-	 * $ajax_search_fields was taken from Automattic/Co-Authors-Plus/../co-authors-plus.php
+	 * Retrieve co-authors user object.
 	 *
-	 * @param WP_TERM $term
-	 * @return array $searchmap
+	 * @param string $key
+	 * @param WP_REST_Request $request
+	 * @return WP_REST_Request|WP_Error, co-authors object data on success, WP_Error otherwise
 	 */
-	public function set_searchmap( $term ) {
-		//This didn't work, some names break the pattern (i.e. "salisbury William S. Salisbury salisbury 87 bsalisbury@pioneerpress.com")
-		$ajax_search_fields = array( 'display_name', 'first_name', 'last_name', 'user_login', 'ID', 'user_email' );
-		$co_authors_values = explode( ' ', $term->description );
-		if ( 5 == count( $co_authors_values ) ) {
-			//Sometimes the user doesn't have an email
-			//avoid index out of bounds error below
-			$co_authors_values[] = null;
+	public function get_item_by( $key, $request ) {
+		$co_authors_value = $request[$key];
+		$coauthor = false;
+
+		//Ensure 'ID' is in the correct case (inconsistent)
+		if ( 'ID' == $key ) {
+			$key = 'id';
 		}
-		$searchmap = array(
-			$ajax_search_fields[0] => $co_authors_values[0],
-			$ajax_search_fields[1] => $co_authors_values[1],
-			$ajax_search_fields[2] => $co_authors_values[2],
-			$ajax_search_fields[3] => $co_authors_values[3],
-			$ajax_search_fields[4] => $co_authors_values[4],
-			$ajax_search_fields[5] => $co_authors_values[5]
-		);
-		return $searchmap;
+
+		if ( ! empty ( $request['parent_id'] ) ) {
+
+			$parent_id = (int) $request['parent_id'];
+
+			//Get the requested coauthor
+			$requested_coauthor = $this->CoAuthors_Plus->get_coauthor_by($key, $co_authors_value, true);
+
+			//Get the 'author' terms for this post
+			$author_terms = wp_get_object_terms( $parent_id, $this->coauthor_taxonomy );
+
+			// Ensure that the requested co_authors_id is a co-author of this post
+			// if none of its authors has this ID, it is invalid
+			foreach ($author_terms as $author_term) {
+
+				if (  $author_term->name == $requested_coauthor->user_login ) {
+					//We found the 'author-user'
+					$coauthor = $requested_coauthor;
+					break;
+				}
+			}
+		} else {
+			//Get this 'author-user'
+			$coauthor = $this->CoAuthors_Plus->get_coauthor_by($key, $co_authors_value, true);
+		}
+
+		if ( ! $coauthor ) {
+			return new WP_Error( 'rest_co_authors_get_user', __( 'Invalid authors ' . $key . '.' ), array( 'status' => 404 ) );
+		}
+
+		$author_post_item = $this->prepare_item_for_response( $coauthor, $request );
+
+		if ( is_wp_error( $author_post_item ) ) {
+			return new WP_Error( 'rest_co_authors_get_user', __( 'Invalid authors ' . $key . '.' ), array( 'status' => 404 ) );
+		}
+
+		if ( ! empty( $author_post_item ) ) {
+			return rest_ensure_response( $author_post_item );
+		}
+
+		return new WP_Error( 'rest_co_authors_get_user', __( 'Invalid authors ' . $key . '.' ), array( 'status' => 404 ) );
 	}
+
 
 	/**
 	 * Prepares co-authors data for return as an object.
 	 * Used to prepare the guest-authors object
 	 *
-	 * @param WP_User $data
+	 * @param stdClass|WP_Post $data
 	 * @param WP_REST_Request $request
 	 * @return WP_REST_Response|WP_Error, co-authors object data on success, WP_Error otherwise
 	 */
 	public function prepare_item_for_response( $data, $request ) {
-		$author_user = array();
+		$author_user = array(
+			'id'                => (int) $data->ID,
+			'display_name'      => (string) $data->display_name,
+			'first_name'        => (string) $data->first_name,
+			'last_name'         => (string) $data->last_name,
+			'user_login'        => (string) $data->user_login,
+			'user_email'        => (string) $data->user_email,
+			'linked_account'    => (string) $data->linked_account,
+			'website'           => (string) $data->website,
+			'aim'               => (string) $data->aim,
+			'yahooim'           => (string) $data->yahooim,
+			'jabber'            => (string) $data->jabber,
+			'description'       => (string) $data->description,
+		);
 
-		if ( 'WP_User' == get_Class( $data )  ) {
-			$author_user = array(
-				'id'            => (int) $data->ID,
-				'first_name'    => (string) $data->first_name,
-				'last_name'     => (string) $data->last_name,
-				'display_name'  => (string) $data->display_name,
-			);
-		}
 
 		$response = rest_ensure_response( $author_user );
 

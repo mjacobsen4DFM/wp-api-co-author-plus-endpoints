@@ -18,14 +18,14 @@ abstract class WP_REST_CoAuthors_AuthorTerms_Controller extends WP_REST_Controll
 	 *
 	 * @var string
 	 */
-	protected $taxonomy;
+	protected $coauthor_taxonomy;
 
 	/**
 	 * Post_type for Co-Authors.
 	 *
 	 * @var string
 	 */
-	protected $post_type;
+	protected $coauthor_post_type;
 
 	/**
 	 * Associated co-author object type.
@@ -62,12 +62,11 @@ abstract class WP_REST_CoAuthors_AuthorTerms_Controller extends WP_REST_Controll
 			return;
 		}
 
-		$this->taxonomy   = 'author';
-		$this->post_type  = 'guest-author';
-
 		if ( class_exists( 'WP_REST_CoAuthors_AuthorTerms' )  ) {
-			$this->AuthorTerm = new WP_REST_CoAuthors_AuthorTerms( $this->namespace, $this->rest_base, $this->parent_base, $this->parent_type, $this->taxonomy, $this->post_type );
-		}	}
+			$this->AuthorTerm = new WP_REST_CoAuthors_AuthorTerms( $this->namespace, $this->rest_base, $this->parent_base, $this->parent_type );
+			$this->coauthor_post_type = $this->AuthorTerm->coauthor_post_type;
+		}
+	}
 
 
 	/**
@@ -142,7 +141,7 @@ abstract class WP_REST_CoAuthors_AuthorTerms_Controller extends WP_REST_Controll
 	public function get_item_schema() {
 		$schema = array(
 			'$schema'              => 'http://json-schema.org/draft-04/schema#',
-			'title'                => 'post_tag' === $this->taxonomy ? 'tag' : $this->taxonomy,
+			'title'                => 'post_tag' === $this->coauthor_taxonomy ? 'tag' : $this->coauthor_taxonomy,
 			'type'                 => 'object',
 			'properties'           => array(
 				'id'               => array(
@@ -198,7 +197,7 @@ abstract class WP_REST_CoAuthors_AuthorTerms_Controller extends WP_REST_Controll
 				),
 			),
 		);
-		$taxonomy = get_taxonomy( $this->taxonomy );
+		$taxonomy = get_taxonomy( $this->coauthor_taxonomy );
 		if ( $taxonomy->hierarchical ) {
 			$schema['properties']['parent'] = array(
 				'description'  => __( 'The id for the parent of the resource.' ),
