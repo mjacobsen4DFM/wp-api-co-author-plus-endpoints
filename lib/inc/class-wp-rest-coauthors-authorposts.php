@@ -141,7 +141,7 @@ class WP_REST_CoAuthors_AuthorPosts extends WP_REST_Controller {
 	 * @return WP_REST_Request|WP_Error, co-authors object data on success, WP_Error otherwise
 	 */
 	public function get_item_by( $key, $request ) {
-		$co_authors_value = (int) $request[$key];
+		$co_authors_value = $request[$key];
 		$value = '';
 
 		// See if this request has a parent
@@ -158,7 +158,7 @@ class WP_REST_CoAuthors_AuthorPosts extends WP_REST_Controller {
 				//$searchmap = $this->set_searchmap($term); //Fail: see function
 
 				//Since the $searchmap method didn't work, trying regex for the int value of the ID
-				$regex = "/\\b(" . $co_authors_id . ")\\b/";
+				$regex = "/\\b(" . $co_authors_value . ")\\b/";
 				preg_match( $regex, $term->description, $matches );
 				$value = $matches[1];
 
