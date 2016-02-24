@@ -28,14 +28,14 @@ class WP_REST_CoAuthors_AuthorTerms extends WP_REST_Controller {
 	 *
 	 * @var string
 	 */
-	protected $coauthor_taxonomy;
+	public $coauthor_taxonomy;
 
 	/**
 	 * Post_type for Co-Authors.
 	 *
 	 * @var string
 	 */
-	protected $coauthor_post_type;
+	public $coauthor_post_type;
 
 	/**
 	 * The namespace of this controller's route.
