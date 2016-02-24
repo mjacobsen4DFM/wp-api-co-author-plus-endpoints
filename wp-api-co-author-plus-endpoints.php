@@ -56,4 +56,4 @@ function co_authors_rest_api_init(){
 	}
 }
 
-#add_action( 'rest_api_init', 'co_authors_rest_api_init', 11, 0 );
+add_action( 'rest_api_init', 'co_authors_rest_api_init', 11, 0 );

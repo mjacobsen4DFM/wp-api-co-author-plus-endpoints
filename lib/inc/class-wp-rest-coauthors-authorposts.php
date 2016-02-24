@@ -10,6 +10,13 @@
 
 class WP_REST_CoAuthors_AuthorPosts extends WP_REST_Controller {
 	/**
+	 * Post_type for Co-Authors.
+	 *
+	 * @var string
+	 */
+	protected $CoAuthorsPlus;
+
+	/**
 	 * Taxonomy for Co-Authors.
 	 *
 	 * @var string
@@ -59,6 +66,7 @@ class WP_REST_CoAuthors_AuthorPosts extends WP_REST_Controller {
 		$this->parent_type = $parent_type;
 		$this->taxonomy = $taxonomy;
 		$this->post_type = $post_type;
+		$this->CoAuthorsPlus = new CoAuthors_Guest_Authors();
 	}
 
 
@@ -111,6 +119,8 @@ class WP_REST_CoAuthors_AuthorPosts extends WP_REST_Controller {
 		return new WP_Error( 'rest_co_authors_get_posts', __( 'Invalid authors id.' ), array( 'status' => 404 ) );
 	}
 
+
+
 	/**
 	 * Retrieve guest-authors object.
 	 * (used by create_item() to immediately confirm creation)
@@ -119,60 +129,68 @@ class WP_REST_CoAuthors_AuthorPosts extends WP_REST_Controller {
 	 * @return WP_REST_Request|WP_Error, co-authors object data on success, WP_Error otherwise
 	 */
 	public function get_item( $request ) {
-		$co_authors_id = (int) $request['id'];
-		$id = null;
-		$terms = null;
-		$author_type = null;
+		$this->get_item_by( 'id', $request );
+	}
+
+	/**
+	 * Retrieve guest-authors object.
+	 * (used by create_item() to immediately confirm creation)
+	 *
+	 * @param string $key
+	 * @param WP_REST_Request $request
+	 * @return WP_REST_Request|WP_Error, co-authors object data on success, WP_Error otherwise
+	 */
+	public function get_item_by( $key, $request ) {
+		$co_authors_value = (int) $request[$key];
+		$value = '';
 
 		// See if this request has a parent
-		if ( ! empty( $request['parent_id'] ) ) {
-
+		if ( ! empty( $request['parent_id'] ) && ( 'id' == $key ) ) {
 			$parent_id = (int) $request['parent_id'];
 
 			//Get the 'author' terms for this post
 			$terms = wp_get_object_terms( $parent_id, $this->taxonomy );
+
+			// Ensure that the request co_authors_id is a co-author
+			// if none of its author terms has this ID it is invalid
+			foreach ( $terms as $term ) {
+				//create a map to look up the metadata in the term->description
+				//$searchmap = $this->set_searchmap($term); //Fail: see function
+
+				//Since the $searchmap method didn't work, trying regex for the int value of the ID
+				$regex = "/\\b(" . $co_authors_id . ")\\b/";
+				preg_match( $regex, $term->description, $matches );
+				$value = $matches[1];
+
+				if ( ! empty( $id ) ) {
+					//This id matches the co_authors_id
+					break;
+				}
+			}
 		} else {
-			//Get all 'author' terms
-			$terms = get_terms( $this->taxonomy );
+			$value = $co_authors_value;
 		}
 
-		// Ensure that the request co_authors_id is a co-author
-		// if none of its author terms has this ID it is invalid
-		foreach ( $terms as $term ) {
-			//create a map to look up the metadata in the term->description
-			//$searchmap = $this->set_searchmap($term); //Fail: see function
+		if ( ! empty( $id ) ) {
 
-			//Since the $searchmap method didn't work, trying regex for the int value of the ID
-			$regex = "/\\b(" . $co_authors_id . ")\\b/";
-			preg_match( $regex, $term->description, $matches );
-			$id = $matches[1];
+			$author_post = $this->CoAuthorsPlus->get_guest_author_by( $key, $value, 'true' );
 
-			if( ! empty( $id ) ) {
-				//This id matches the co_authors_id
-				break;
+			if ( ! $author_post ) {
+				return new WP_Error( 'rest_co_authors_get_post', __( 'Invalid authors ' . $key . '.' ), array( 'status' => 404 ) );
+			}
+
+			$author_post_item = $this->prepare_item_for_response( $author_post, $request );
+
+			if ( is_wp_error( $author_post_item ) ) {
+				return new WP_Error( 'rest_co_authors_get_post', __( 'Invalid authors ' . $key . '.' ), array( 'status' => 404 ) );
+			}
+
+			if ( ! empty( $author_post_item ) ) {
+				return rest_ensure_response( $author_post_item );
 			}
 		}
 
-		if( ! empty( $id ) ) {
-			//Get the post for this 'author' term
-			$author_post = get_post( $id );
-
-			// Ensure $author_post is a post and that it is an author
-			if ( 'WP_Post' == get_Class( $author_post ) || $author_post->post_type == $this->post_type ) {
-				// Enhance the object attributes for JSON
-				$author_post_item = $this->prepare_item_for_response( $author_post, $request );
-
-				if ( is_wp_error( $author_post_item ) ) {
-					return new WP_Error( 'rest_co_authors_get_post', __( 'Invalid authors id.' ), array( 'status' => 404 ) );
-				}
-
-				if ( ! empty( $author_post_item ) ) {
-					return rest_ensure_response( $author_post_item );
-				}
-			}
-		}
-
-		return new WP_Error( 'rest_co_authors_get_post', __( 'Invalid authors id.' ), array( 'status' => 404 ) );
+		return new WP_Error( 'rest_co_authors_get_post', __( 'Invalid authors ' . $key . '.' ), array( 'status' => 404 ) );
 	}
 
 
@@ -209,22 +227,26 @@ class WP_REST_CoAuthors_AuthorPosts extends WP_REST_Controller {
 	 * Prepares co-authors data for return as an object.
 	 * Used to prepare the guest-authors object
 	 *
-	 * @param WP_Post $data guest-authors post_type post row from database
+	 * @param stdClass|WP_Post $data guest-authors post_type post row from database
 	 * @param WP_REST_Request $request
 	 * @return WP_REST_Response|WP_Error, co-authors object data on success, WP_Error otherwise
 	 */
 	public function prepare_item_for_response( $data, $request ) {
-		$author_post = array();
+		$author_post = array(
+			'id'                => (int) $data->ID,
+			'display_name'      => (string) $data->display_name,
+			'first_name'        => (string) $data->first_name,
+			'last_name'         => (string) $data->last_name,
+			'user_login'        => (string) $data->user_login,
+			'user_email'        => (string) $data->user_email,
+			'linked_account'    => (string) $data->linked_account,
+			'website'           => (string) $data->website,
+			'aim'               => (string) $data->aim,
+			'yahooim'           => (string) $data->yahooim,
+			'jabber'            => (string) $data->jabber,
+			'description'       => (string) $data->description,
+		);
 
-		if ( 'WP_Post' == get_Class( $data )  ) {
-			$author_post = array(
-				'id'            => (int) $data->ID,
-				'post_name'     => (string) $data->post_name,
-				'post_type'     => (string) $data->post_type,
-				'post_title'    => (string) $data->post_title,
-				'post_date'     => (string) $data->post_date,
-			);
-		}
 
 		$response = rest_ensure_response( $author_post );
 
