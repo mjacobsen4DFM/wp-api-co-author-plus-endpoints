@@ -93,7 +93,19 @@ class WP_REST_CoAuthors_AuthorPosts extends WP_REST_Controller {
 			$authors = get_coauthors($parent_id);
 		} else {
 			//Get all coauthor posts
-			$authors = $this->CoAuthors_Plus->search_authors();
+			$author_terms = get_terms( $this->CoAuthors_Plus->coauthor_taxonomy );
+			$authors = array();
+			foreach ( $author_terms as $author_term ) {
+				if ( false === ( $coauthor = $this->CoAuthors_Plus->get_coauthor_by( 'user_login', $author_term->name ) ) ) {
+					continue;
+				}
+
+				$authors[ $author_term->name ] = $coauthor;
+
+				$authors[ $author_term->name ]->post_count = $author_term->count;
+			}
+
+			$authors = apply_filters( 'coauthors_wp_list_authors_array', $authors );
 		}
 
 
