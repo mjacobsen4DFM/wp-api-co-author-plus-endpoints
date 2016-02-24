@@ -107,12 +107,9 @@ class WP_REST_CoAuthors_AuthorPosts extends WP_REST_Controller {
 			//Get the post that matches the term
 			$coauthor = $this->CoAuthors_Guest_Authors->get_guest_author_by('user_login', $author_term->name, true);
 
-			if ( ! $coauthor ) {
-				continue;
+			if ( ! $coauthor ) {//Get the linked_account that matches the term
+				$coauthor = $this->CoAuthors_Guest_Authors->get_guest_author_by('linked_account', $author_term->name, true);
 			}
-
-			//Get the linked_account that matches the term
-			$coauthor = $this->CoAuthors_Guest_Authors->get_guest_author_by('linked_account', $author_term->name, true);
 
 			if ( ! $coauthor ) {
 				continue;
