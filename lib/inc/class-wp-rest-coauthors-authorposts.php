@@ -147,24 +147,22 @@ class WP_REST_CoAuthors_AuthorPosts extends WP_REST_Controller {
 		// See if this request has a parent
 		if ( ! empty( $request['parent_id'] ) && ( 'id' == $key ) ) {
 			$parent_id = (int) $request['parent_id'];
-
-			//Get the 'author' terms for this post
-			$terms = wp_get_object_terms( $parent_id, $this->taxonomy );
+			$authors = get_coauthors($parent_id);
 
 			// Ensure that the request co_authors_id is a co-author
 			// if none of its author terms has this ID it is invalid
-			foreach ( $terms as $term ) {
-				//create a map to look up the metadata in the term->description
-				//$searchmap = $this->set_searchmap($term); //Fail: see function
+			foreach ( $authors as $author ) {
 
-				//Since the $searchmap method didn't work, trying regex for the int value of the ID
-				$regex = "/\\b(" . $co_authors_value . ")\\b/";
-				preg_match( $regex, $term->description, $matches );
-				$value = $matches[1];
+				if ( $co_authors_value == $author->$key ) {
+					$author_post_item = $this->prepare_item_for_response( $author, $request );
 
-				if ( ! empty( $id ) ) {
-					//This id matches the co_authors_id
-					break;
+					if ( is_wp_error( $author_post_item ) ) {
+						return new WP_Error( 'rest_co_authors_get_post', __( 'Invalid authors ' . $key . '.' ), array( 'status' => 404 ) );
+					}
+
+					if ( ! empty( $author_post_item ) ) {
+						return rest_ensure_response( $author_post_item );
+					}
 				}
 			}
 		} else {
