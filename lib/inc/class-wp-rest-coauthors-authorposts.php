@@ -111,6 +111,13 @@ class WP_REST_CoAuthors_AuthorPosts extends WP_REST_Controller {
 				continue;
 			}
 
+			//Get the linked_account that matches the term
+			$coauthor = $this->CoAuthors_Guest_Authors->get_guest_author_by('linked_account', $author_term->name, true);
+
+			if ( ! $coauthor ) {
+				continue;
+			}
+
 			$authors[] = $coauthor;
 		}
 
