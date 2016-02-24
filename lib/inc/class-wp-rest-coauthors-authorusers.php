@@ -171,8 +171,8 @@ class WP_REST_CoAuthors_AuthorUsers extends WP_REST_Controller {
 		$coauthor = false;
 
 		//Ensure 'ID' is in the correct case (inconsistent)
-		if ( 'id' == $key ) {
-			$key = 'ID';
+		if ( 'ID' == $key ) {
+			$key = 'id';
 		}
 
 		if ( ! empty ( $request['parent_id'] ) ) {
