@@ -142,7 +142,7 @@ class WP_REST_CoAuthors_AuthorPosts extends WP_REST_Controller {
 	 */
 	public function get_item_by( $key, $request ) {
 		$co_authors_value = $request[$key];
-		$value = '';
+		$co_authors_value = '';
 
 		// See if this request has a parent
 		if ( ! empty( $request['parent_id'] ) && ( 'id' == $key ) ) {
@@ -171,7 +171,7 @@ class WP_REST_CoAuthors_AuthorPosts extends WP_REST_Controller {
 			$value = $co_authors_value;
 		}
 
-		if ( ! empty( $id ) ) {
+		if ( ! empty( $value ) ) {
 
 			$author_post = $this->CoAuthorsPlus->get_guest_author_by( $key, $value, 'true' );
 
