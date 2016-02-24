@@ -211,35 +211,6 @@ class WP_REST_CoAuthors_AuthorPosts extends WP_REST_Controller {
 	}
 
 
-
-	/**
-	 * Create a map to search the description field
-	 *
-	 * $ajax_search_fields was taken from Automattic/Co-Authors-Plus/../co-authors-plus.php
-	 *
-	 * @param WP_TERM $term
-	 * @return array $searchmap
-	 */
-	public function set_searchmap( $term ) {
-		//This didn't work, some names break the pattern (i.e. "salisbury William S. Salisbury salisbury 87 bsalisbury@pioneerpress.com")
-		$ajax_search_fields = array( 'display_name', 'first_name', 'last_name', 'user_login', 'ID', 'user_email' );
-		$co_authors_values = explode( ' ', $term->description );
-		if ( 5 == count( $co_authors_values ) ) {
-			//Sometimes the user doesn't have an email
-			//avoid index out of bounds error below
-			$co_authors_values[] = null;
-		}
-		$searchmap = array(
-			$ajax_search_fields[0] => $co_authors_values[0],
-			$ajax_search_fields[1] => $co_authors_values[1],
-			$ajax_search_fields[2] => $co_authors_values[2],
-			$ajax_search_fields[3] => $co_authors_values[3],
-			$ajax_search_fields[4] => $co_authors_values[4],
-			$ajax_search_fields[5] => $co_authors_values[5]
-		);
-		return $searchmap;
-	}
-
 	/**
 	 * Prepares co-authors data for return as an object.
 	 * Used to prepare the guest-authors object
