@@ -14,7 +14,14 @@ class WP_REST_CoAuthors_AuthorPosts extends WP_REST_Controller {
 	 *
 	 * @var string
 	 */
-	protected $CoAuthorsPlus;
+	protected $CoAuthors_Plus;
+
+	/**
+	 * Post_type for Co-Authors.
+	 *
+	 * @var string
+	 */
+	protected $CoAuthors_Guest_Authors;
 
 	/**
 	 * Taxonomy for Co-Authors.
@@ -66,7 +73,8 @@ class WP_REST_CoAuthors_AuthorPosts extends WP_REST_Controller {
 		$this->parent_type = $parent_type;
 		$this->taxonomy = $taxonomy;
 		$this->post_type = $post_type;
-		$this->CoAuthorsPlus = new CoAuthors_Guest_Authors();
+		$this->CoAuthors_Plus = new coauthors_plus ();
+		$this->CoAuthors_Guest_Authors = new CoAuthors_Guest_Authors();
 	}
 
 
@@ -77,37 +85,27 @@ class WP_REST_CoAuthors_AuthorPosts extends WP_REST_Controller {
 	 * @return WP_REST_Request|WP_Error, List of co-author objects data on success, WP_Error otherwise
 	 */
 	public function get_items( $request ) {
+
 		if ( ! empty( $request['parent_id'] ) ) {
 			$parent_id = (int) $request['parent_id'];
 
-			//Get the 'author' terms for this post
-			$terms = wp_get_object_terms( $parent_id, $this->taxonomy );
+			//Get the coauthor posts for this post
+			$authors = get_coauthors($parent_id);
 		} else {
-			//Get all 'author' terms
-			$terms = get_terms( $this->taxonomy );
+			//Get all coauthor posts
+			$authors = $this->CoAuthors_Plus->search_authors();
 		}
 
-		foreach ( $terms as $term ) {
-			//create a map to look up the metadata in the term->description
-			//$searchmap = $this->set_searchmap($term); //Fail: see function
 
-			//Since the co-authors method didn't work, trying regex for the int value of the ID
-			$regex = "/\\b(\\d+)\\b/";
-			preg_match( $regex, $term->description, $matches );
-			$id = $matches[1];
+		foreach ( $authors as $author ) {
 
-			//Get the post for this 'author' term
-			$author_post = get_post( $id );
+			$author_post_item = $this->prepare_item_for_response( $author, $request );
 
-			// Make sure $author_post is a post and that it is an author
-			if ( 'WP_Post' == get_Class( $author_post ) && $author_post->post_type == $this->post_type ) {
-				// Enhance the object attributes for JSON
-				$author_post_item = $this->prepare_item_for_response( $author_post, $request );
+			if ( is_wp_error( $author_post_item ) ) {
+				continue;
+			}
 
-				if ( is_wp_error( $author_post_item ) ) {
-					continue;
-				}
-
+			if ( ! empty( $author_post_item ) ) {
 				$author_posts[] = $this->prepare_response_for_collection( $author_post_item );
 			}
 		}
@@ -129,7 +127,7 @@ class WP_REST_CoAuthors_AuthorPosts extends WP_REST_Controller {
 	 * @return WP_REST_Request|WP_Error, co-authors object data on success, WP_Error otherwise
 	 */
 	public function get_item( $request ) {
-		return $this->get_item_by( 'id', $request );
+		return $this->get_item_by( 'ID', $request );
 	}
 
 	/**
@@ -142,18 +140,20 @@ class WP_REST_CoAuthors_AuthorPosts extends WP_REST_Controller {
 	 */
 	public function get_item_by( $key, $request ) {
 		$co_authors_value = $request[$key];
-		$value = '';
+
+		//Ensure 'ID' is in the correct case (inconsistent)
 		if ( 'id' == $key ) {
 			$key = 'ID';
 		}
 
 		// See if this request has a parent
 		if ( ! empty( $request['parent_id'] ) ) {
+
 			$parent_id = (int) $request['parent_id'];
 			$authors = get_coauthors($parent_id);
 
-			// Ensure that the request co_authors_id is a co-author
-			// if none of its author terms has this ID it is invalid
+			// Ensure that the requested co_authors_id is a co-author of this post
+			// if none of its authors has this ID, it is invalid
 			foreach ( $authors as $author ) {
 
 				if ( $co_authors_value == $author->$key ) {
@@ -169,12 +169,8 @@ class WP_REST_CoAuthors_AuthorPosts extends WP_REST_Controller {
 				}
 			}
 		} else {
-			$value = $co_authors_value;
-		}
 
-		if ( ! empty( $value ) ) {
-
-			$author_post = $this->CoAuthorsPlus->get_guest_author_by( $key, $value, 'true' );
+			$author_post = $this->CoAuthors_Guest_Authors->get_guest_author_by( $key, $co_authors_value, 'true' );
 
 			if ( ! $author_post ) {
 				return new WP_Error( 'rest_co_authors_get_post', __( 'Invalid authors ' . $key . '.' ), array( 'status' => 404 ) );
