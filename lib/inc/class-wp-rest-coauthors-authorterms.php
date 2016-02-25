@@ -216,8 +216,8 @@ class WP_REST_CoAuthors_AuthorTerms extends WP_REST_Controller {
 		$parent_id = (int)$request['parent_id'];
 		$coauthor_id = $request['id'];    //Currently only supports 1 author; send multiple posts to add multiple authors
 
-		if (!is_array($coauthor_id)) {
-			$coauthor_id = array($coauthor_id);
+		if ( ! is_array( $coauthor_id ) ) {
+			$coauthor_id = array( $coauthor_id );
 		}
 
 		$author_term_id = wp_set_object_terms( $parent_id, $coauthor_id, $this->coauthor_taxonomy, true );
