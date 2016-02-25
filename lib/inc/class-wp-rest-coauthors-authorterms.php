@@ -87,6 +87,16 @@ class WP_REST_CoAuthors_AuthorTerms extends WP_REST_Controller {
 	public function get_items( $request ) {
 
 		$author_terms = array();
+		$term_ids = null;
+
+		if ( ! empty( $request['id_list'] ) ) {
+			//term_id list from JSON
+			$term_ids = $request['id_list'];
+
+			if ( ! is_array( $term_ids ) ) {
+				$term_ids = array( $term_ids );
+			}
+		}
 
 		if ( ! empty( $request['parent_id'] ) ) {
 			$parent_id = (int) $request['parent_id'];
@@ -99,13 +109,18 @@ class WP_REST_CoAuthors_AuthorTerms extends WP_REST_Controller {
 		}
 
 		foreach ( $terms as $term ) {
-			$term_item = $this->prepare_item_for_response( $term, $request );
 
-			if ( is_wp_error( $term_item ) ) {
-				continue;
+			if ( ( is_array( $term_ids ) && in_array( $term->id, $term_ids ) || is_null( $term_ids ) ) ) {
+				//if a list of id's were requested, check to see if they are in the list
+				//Otherwise, $term_ids should be null, so return all terms
+				$term_item = $this->prepare_item_for_response( $term, $request );
+
+				if ( is_wp_error( $term_item ) ) {
+					continue;
+				}
+
+				$author_terms[] = $this->prepare_response_for_collection( $term_item );
 			}
-
-			$author_terms[] = $this->prepare_response_for_collection( $term_item );
 		}
 
 		if ( ! empty( $author_terms ) ) {
@@ -214,15 +229,15 @@ class WP_REST_CoAuthors_AuthorTerms extends WP_REST_Controller {
 	 */
 	public function create_item( $request ) {
 		$parent_id = (int)$request['parent_id'];
-		$coauthor_id = $request['id'];    //Currently only supports 1 author; send multiple posts to add multiple authors
+		$coauthor_id = $request['id'];
 
 		if ( ! is_array( $coauthor_id ) ) {
 			$coauthor_id = array( $coauthor_id );
 		}
 
-		$author_term_id = wp_set_object_terms( $parent_id, $coauthor_id, $this->coauthor_taxonomy, true );
+		$author_term_ids = wp_set_object_terms( $parent_id, $coauthor_id, $this->coauthor_taxonomy, true );
 
-		if ( is_wp_error( $author_term_id ) ) {
+		if ( is_wp_error( $author_term_ids ) ) {
 			// There was an error somewhere and the terms couldn't be set.
 			return new WP_Error( 'rest_author_could_not_add', __( 'Could not add author.' ), array( 'status' => 400 ) );
 		} else {
@@ -233,9 +248,9 @@ class WP_REST_CoAuthors_AuthorTerms extends WP_REST_Controller {
 			$request->set_query_params( array(
 				'context'   => 'edit',
 				'parent_id' => $parent_id,
-				'id'        => $author_term_id[0],
+				'id'        => $author_term_ids,
 			) );
-			$response = rest_ensure_response( $this->get_item( $request ) );
+			$response = rest_ensure_response( $this->get_items( $request ) );
 
 			if ( is_wp_error( $response ) ) {
 				// There was an error somewhere and the terms couldn't be retrieved.
