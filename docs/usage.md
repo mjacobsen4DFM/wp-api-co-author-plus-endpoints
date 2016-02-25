@@ -102,9 +102,10 @@ You can use 2 methods for attaching an author to a post.
 `http://example.com/wp-json/co-authors/v1/posts/60946/author-terms/875`
 
 2. Passing a JSON as the body of a RESTful Post:
-`http://example.com/wp-json/co-authors/v1/posts/60946/author-terms/` with JSON in the body: `{ "id":875 }`
+`http://example.com/wp-json/co-authors/v1/posts/60946/author-terms/` with JSON in the body:
+`{ "id":875 }` or `{ "id":[ 875, 913 ] }`
 
-#### Both will return:
+#### The single ID will return:
 ```
 {
    "id":875,
@@ -126,6 +127,50 @@ You can use 2 methods for attaching an author to a post.
    }
 }
 ```
+#### The ID array  will return:
+```
+[{
+   "id":875,
+   "name":"west",
+   "slug":"cap-west",
+   "term_group ":0,
+   "term_taxonomy_id":875,
+   "taxonomy":"author",
+   "description":"west North West nwest 45 nwest@example.com",
+   "parent":0,
+   "count":327,
+   "_links":{
+      "about":[
+         {
+            "embeddable":true,
+            "href":"http:\/\/example.com\/wp-json\/co-authors\/v1\/author-terms\/875"
+         }
+      ]
+   }
+},
+{
+   "id":913,
+   "name":"jones",
+   "slug":"cap-jones",
+   "term_group ":0,
+   "term_taxonomy_id":913,
+   "taxonomy":"author",
+   "description":"jones Bill S. Jones bjones 87 bjones@example.com",
+   "parent":0,
+   "count":1443,
+   "_links":{
+      "about":[
+         {
+            "embeddable":true,
+            "href":"http:\/\/example.com\/wp-json\/co-authors\/v1\/author-terms\/913"
+         }
+      ]
+   }
+}
+```
+** Note:** If there are already guest-authors attached to the post, they will be returned too. 
+The return is equivelant to `http://example.com/wp-json/co-authors/v1/posts/60946/author-posts`
+
 
 ( FYI, the above author-term points to a real user with ID=45, as can be seen in the "description" )
 ___

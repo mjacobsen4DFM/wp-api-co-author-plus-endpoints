@@ -35,11 +35,17 @@ https://github.com/Automattic/Co-Authors-Plus
 
 
 ##### To do:
-~~Allow an array of co-author term IDs to be passed via JSON to attach multiple co-authors to a post.~~
-Add functionality to use the co-author post id to attach stories to a post.
-Add functionality to use the co-author user id to attach stories to a post.
+* ~~Allow an array of co-author term IDs to be passed via JSON to attach multiple co-authors to a post.~~
+* Add functionality to use the co-author **author-posts** id to attach guest-authors to a post.
+* Add functionality to use the co-author **author-users** id to attach guest-authors to a post.
 
 ## Changelog ##
 
 ### 0.0.1 (February 21, 2016) ###
 * Initial release.
+
+### 0.0.2 (February 24, 2016) ###
+* Co-Authors enhanced release.
+
+### 0.0.3 (February 25, 2016) ###
+* Muti-author feature release.
