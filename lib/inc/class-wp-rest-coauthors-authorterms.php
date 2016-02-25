@@ -220,10 +220,17 @@ class WP_REST_CoAuthors_AuthorTerms extends WP_REST_Controller {
 
 		if ( is_wp_error( $author_term_id ) ) {
 			// There was an error somewhere and the terms couldn't be set.
-			return $author_term_id;
+			return new WP_Error( 'rest_author_could_not_add', __( 'Could not add author.' ), array( 'status' => 400 ) );
 		} else {
+
 			// Success! The post's author was set.
 			//Verify that it is there.
+			$request = new WP_REST_Request( 'GET' );
+			$request->set_query_params( array(
+				'context'   => 'edit',
+				'parent_id' => $parent_id,
+				'id'        => $author_term_id[0],
+			) );
 			$response = rest_ensure_response( $this->get_item( $request ) );
 
 			if ( is_wp_error( $response ) ) {
@@ -235,8 +242,8 @@ class WP_REST_CoAuthors_AuthorTerms extends WP_REST_Controller {
 			$data = $response->get_data();
 			$response->header( 'Location', rest_url( $this->namespace . '/' . $this->parent_base . '/' . $parent_id . '/' . $this->rest_base . '/' . $data['id'] ) );
 
-			$data = new stdClass();
-			$data->id = $author_term;
+			//$data = new stdClass();
+			//$data->id = $author_term;
 
 			/* This action is documented in WP-API/../lib/endpoints/class-wp-rest-terms-controller.php */
 			do_action( 'rest_insert_author', $data, $request, true );
