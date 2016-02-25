@@ -141,7 +141,7 @@ abstract class WP_REST_CoAuthors_AuthorTerms_Controller extends WP_REST_Controll
 	public function get_item_schema() {
 		$schema = array(
 			'$schema'              => 'http://json-schema.org/draft-04/schema#',
-			'title'                => 'post_tag' === $this->coauthor_taxonomy ? 'tag' : $this->coauthor_taxonomy,
+			'title'                => $this->coauthor_taxonomy,
 			'type'                 => 'object',
 			'properties'           => array(
 				'id'               => array(
@@ -149,6 +149,7 @@ abstract class WP_REST_CoAuthors_AuthorTerms_Controller extends WP_REST_Controll
 					'type'         => 'integer',
 					'context'      => array( 'view', 'embed', 'edit' ),
 					'readonly'     => true,
+					'required'     => true,
 				),
 				'count'            => array(
 					'description'  => __( 'Number of published posts for the resource.' ),
@@ -160,9 +161,7 @@ abstract class WP_REST_CoAuthors_AuthorTerms_Controller extends WP_REST_Controll
 					'description'  => __( 'HTML description of the resource.' ),
 					'type'         => 'string',
 					'context'      => array( 'view', 'edit' ),
-					'arg_options'  => array(
-						'sanitize_callback' => 'wp_filter_post_kses',
-					),
+					'readonly'     => true,
 				),
 				'link'             => array(
 					'description'  => __( 'URL to the resource.' ),
@@ -175,18 +174,13 @@ abstract class WP_REST_CoAuthors_AuthorTerms_Controller extends WP_REST_Controll
 					'description'  => __( 'HTML title for the resource.' ),
 					'type'         => 'string',
 					'context'      => array( 'view', 'embed', 'edit' ),
-					'arg_options'  => array(
-						'sanitize_callback' => 'sanitize_text_field',
-					),
-					'required'     => true,
+					'readonly'     => true,
 				),
 				'slug'             => array(
 					'description'  => __( 'An alphanumeric identifier for the resource unique to its type.' ),
 					'type'         => 'string',
 					'context'      => array( 'view', 'embed', 'edit' ),
-					'arg_options'  => array(
-						'sanitize_callback' => 'sanitize_title',
-					),
+					'readonly'     => true,
 				),
 				'taxonomy'         => array(
 					'description'  => __( 'Type attribution for the resource.' ),
