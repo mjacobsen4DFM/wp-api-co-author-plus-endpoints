@@ -213,10 +213,14 @@ class WP_REST_CoAuthors_AuthorTerms extends WP_REST_Controller {
 	 * @return WP_REST_Response|WP_Error
 	 */
 	public function create_item( $request ) {
-		$parent_id = (int) $request['parent_id'];
-		$author_term = (int) $request['id']; 	//Currently only supports 1 author; send multiple posts to add multiple authors
+		$parent_id = (int)$request['parent_id'];
+		$coauthor_id = $request['id'];    //Currently only supports 1 author; send multiple posts to add multiple authors
 
-		$author_term_id = wp_set_object_terms( $parent_id, $author_term, $this->coauthor_taxonomy, true );
+		if (!is_array($coauthor_id)) {
+			$coauthor_id = array($coauthor_id);
+		}
+
+		$author_term_id = wp_set_object_terms( $parent_id, $coauthor_id, $this->coauthor_taxonomy, true );
 
 		if ( is_wp_error( $author_term_id ) ) {
 			// There was an error somewhere and the terms couldn't be set.
