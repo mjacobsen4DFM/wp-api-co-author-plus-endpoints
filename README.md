@@ -35,7 +35,7 @@ https://github.com/Automattic/Co-Authors-Plus
 
 
 ##### To do:
-Allow an array of co-author term IDs to be passed via JSON to attach multiple co-authors to a post.
+~~Allow an array of co-author term IDs to be passed via JSON to attach multiple co-authors to a post.~~
 Add functionality to use the co-author post id to attach stories to a post.
 Add functionality to use the co-author user id to attach stories to a post.
 

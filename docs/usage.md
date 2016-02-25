@@ -131,7 +131,7 @@ You can use 2 methods for attaching an author to a post.
 ___
 
 
-**TO-DO**: make the JSON, capable of adding multiple co-authors via an array: ```{ "id":[913, 358, 875] }```
+**TO-DO**: ~~make the JSON, capable of adding multiple co-authors via an array: ```{ "id":[913, 358, 875] }```~~
 
 
 ___
