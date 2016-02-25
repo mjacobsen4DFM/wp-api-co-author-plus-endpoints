@@ -166,10 +166,10 @@ You can use 2 methods for attaching an author to a post.
          }
       ]
    }
-}
+}]
 ```
-** Note:** If there are already guest-authors attached to the post, they will be returned too. 
-The return is equivelant to `http://example.com/wp-json/co-authors/v1/posts/60946/author-posts`
+** Note:** If there are already guest-authors attached to the post, they will be returned too.
+The return is equivalent to `http://example.com/wp-json/co-authors/v1/posts/60946/author-posts`
 
 
 ( FYI, the above author-term points to a real user with ID=45, as can be seen in the "description" )
