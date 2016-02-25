@@ -229,13 +229,13 @@ class WP_REST_CoAuthors_AuthorTerms extends WP_REST_Controller {
 	 */
 	public function create_item( $request ) {
 		$parent_id = (int)$request['parent_id'];
-		$coauthor_id = $request['id'];
+		$term_ids = $request['id'];
 
-		if ( ! is_array( $coauthor_id ) ) {
-			$coauthor_id = array( $coauthor_id );
+		if ( ! is_array( $term_ids ) ) {
+			$term_ids = array( $term_ids );
 		}
 
-		$author_term_ids = wp_set_object_terms( $parent_id, $coauthor_id, $this->coauthor_taxonomy, true );
+		$author_term_ids = wp_set_object_terms( $parent_id, $term_ids, $this->coauthor_taxonomy, true );
 
 		if ( is_wp_error( $author_term_ids ) ) {
 			// There was an error somewhere and the terms couldn't be set.
@@ -248,7 +248,7 @@ class WP_REST_CoAuthors_AuthorTerms extends WP_REST_Controller {
 			$request->set_query_params( array(
 				'context'   => 'edit',
 				'parent_id' => $parent_id,
-				'id'        => $author_term_ids,
+				'id_list'   => $author_term_ids,
 			) );
 			$response = rest_ensure_response( $this->get_items( $request ) );
 
