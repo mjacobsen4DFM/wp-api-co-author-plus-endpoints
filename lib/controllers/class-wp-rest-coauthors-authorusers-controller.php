@@ -131,11 +131,12 @@ abstract class WP_REST_CoAuthors_AuthorUsers_Controller extends WP_REST_Controll
 	 *
 	 * @return array
 	 */
+
 	public function get_item_schema() {
 
 		$schema = array(
 			'$schema'    => 'http://json-schema.org/draft-04/schema#',
-			'title'      => 'user',
+			'title'      => 'author-user',
 			'type'       => 'object',
 			'properties' => array(
 				'id'                 => array(
@@ -144,13 +145,7 @@ abstract class WP_REST_CoAuthors_AuthorUsers_Controller extends WP_REST_Controll
 					'context'     => array( 'embed', 'view', 'edit' ),
 					'readonly'    => true,
 				),
-				'username'           => array(
-					'description' => __( 'Login name for the resource.' ),
-					'type'        => 'string',
-					'context'     => array( 'edit' ),
-					'required'    => true,
-				),
-				'name'               => array(
+				'display_name'       => array(
 					'description' => __( 'Display name for the resource.' ),
 					'type'        => 'string',
 					'context'     => array( 'embed', 'view', 'edit' ),
@@ -159,100 +154,56 @@ abstract class WP_REST_CoAuthors_AuthorUsers_Controller extends WP_REST_Controll
 					'description' => __( 'First name for the resource.' ),
 					'type'        => 'string',
 					'context'     => array( 'edit' ),
-					'arg_options' => array(
-						'sanitize_callback' => 'sanitize_text_field',
-					),
 				),
 				'last_name'          => array(
 					'description' => __( 'Last name for the resource.' ),
 					'type'        => 'string',
 					'context'     => array( 'edit' ),
 				),
-				'email'              => array(
+				'user_email'              => array(
 					'description' => __( 'The email address for the resource.' ),
 					'type'        => 'string',
 					'format'      => 'email',
 					'context'     => array( 'edit' ),
 					'required'    => true,
 				),
-				'url'                => array(
-					'description' => __( 'URL of the resource.' ),
+				'user_login'              => array(
+					'description' => __( 'Login ID.' ),
+					'type'        => 'string',
+					'context'     => array( 'edit' ),
+					'required'    => true,
+				),
+				'website'                => array(
+					'description' => __( 'URL to the author website.' ),
 					'type'        => 'string',
 					'format'      => 'uri',
 					'context'     => array( 'embed', 'view', 'edit' ),
+				),
+				'aim'               => array(
+					'description' => __( 'AOL Instant Messenger ID.' ),
+					'type'        => 'string',
+					'context'     => array( 'embed', 'view', 'edit' ),
+					'readonly'    => true,
+				),
+				'yahooim'               => array(
+					'description' => __( 'Yahoo Instant Messenger ID.' ),
+					'type'        => 'string',
+					'context'     => array( 'embed', 'view', 'edit' ),
+					'readonly'    => true,
+				),
+				'jabber'               => array(
+					'description' => __( 'Jabber Instant Messenger ID.' ),
+					'type'        => 'string',
+					'context'     => array( 'embed', 'view', 'edit' ),
+					'readonly'    => true,
 				),
 				'description'        => array(
 					'description' => __( 'Description of the resource.' ),
 					'type'        => 'string',
 					'context'     => array( 'embed', 'view', 'edit' )
 				),
-				'link'               => array(
-					'description' => __( 'Author URL to the resource.' ),
-					'type'        => 'string',
-					'format'      => 'uri',
-					'context'     => array( 'embed', 'view', 'edit' ),
-					'readonly'    => true,
-				),
-				'nickname'           => array(
-					'description' => __( 'The nickname for the resource.' ),
-					'type'        => 'string',
-					'context'     => array( 'edit' ),
-					'arg_options' => array(
-						'sanitize_callback' => 'sanitize_text_field',
-					),
-				),
-				'slug'               => array(
-					'description' => __( 'An alphanumeric identifier for the resource.' ),
-					'type'        => 'string',
-					'context'     => array( 'embed', 'view', 'edit' ),
-				),
-				'registered_date'    => array(
-					'description' => __( 'Registration date for the resource.' ),
-					'type'        => 'date-time',
-					'context'     => array( 'edit' ),
-					'readonly'    => true,
-				),
-				'roles'              => array(
-					'description' => __( 'Roles assigned to the resource.' ),
-					'type'        => 'array',
-					'context'     => array( 'edit' ),
-				),
-				'capabilities'       => array(
-					'description' => __( 'All capabilities assigned to the resource.' ),
-					'type'        => 'object',
-					'context'     => array( 'edit' ),
-				),
-				'extra_capabilities' => array(
-					'description' => __( 'Any extra capabilities assigned to the resource.' ),
-					'type'        => 'object',
-					'context'     => array( 'edit' ),
-					'readonly'    => true,
-				),
 			),
 		);
-
-		if ( get_option( 'show_avatars' ) ) {
-			$avatar_properties = array();
-
-			$avatar_sizes = rest_get_avatar_sizes();
-			foreach ( $avatar_sizes as $size ) {
-				$avatar_properties[ $size ] = array(
-					'description' => sprintf( __( 'Avatar URL with image size of %d pixels.' ), $size ),
-					'type'        => 'string',
-					'format'      => 'uri',
-					'context'     => array( 'embed', 'view', 'edit' ),
-				);
-			}
-
-			$schema['properties']['avatar_urls'] = array(
-				'description' => __( 'Avatar URLs for the resource.' ),
-				'type'        => 'object',
-				'context'     => array( 'embed', 'view', 'edit' ),
-				'readonly'    => true,
-				'properties'  => $avatar_properties,
-			);
-
-		}
 
 		return $this->add_additional_fields_schema( $schema );
 	}
