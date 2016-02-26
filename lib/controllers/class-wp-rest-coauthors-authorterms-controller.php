@@ -55,15 +55,17 @@ abstract class WP_REST_CoAuthors_AuthorTerms_Controller extends WP_REST_Controll
 	public function __construct() {
 		if ( empty( $this->parent_type ) ) {
 			_doing_it_wrong( 'WP_REST_Meta_Controller::__construct', __( 'The object type must be overridden' ), 'WPAPI-2.0' );
+
 			return;
 		}
 		if ( empty( $this->parent_base ) ) {
 			_doing_it_wrong( 'WP_REST_Meta_Controller::__construct', __( 'The parent base must be overridden' ), 'WPAPI-2.0' );
+
 			return;
 		}
 
-		if ( class_exists( 'WP_REST_CoAuthors_AuthorTerms' )  ) {
-			$this->AuthorTerm = new WP_REST_CoAuthors_AuthorTerms( $this->namespace, $this->rest_base, $this->parent_base, $this->parent_type );
+		if ( class_exists( 'WP_REST_CoAuthors_AuthorTerms' ) ) {
+			$this->AuthorTerm         = new WP_REST_CoAuthors_AuthorTerms( $this->namespace, $this->rest_base, $this->parent_base, $this->parent_type );
 			$this->coauthor_post_type = $this->AuthorTerm->coauthor_post_type;
 		}
 	}
@@ -134,82 +136,84 @@ abstract class WP_REST_CoAuthors_AuthorTerms_Controller extends WP_REST_Controll
 	}
 
 	/**
+	 * Get the query params for collections
+	 *
+	 * @return array
+	 */
+	public function get_collection_params() {
+		$query_params                       = parent::get_collection_params();
+		$query_params['context']['default'] = 'view';
+
+		return $query_params;
+	}
+
+	/**
 	 * Get the Term's schema, conforming to JSON Schema
 	 *
 	 * @return array
 	 */
 	public function get_item_schema() {
-		$schema = array(
-			'$schema'              => 'http://json-schema.org/draft-04/schema#',
-			'title'                => $this->coauthor_taxonomy,
-			'type'                 => 'object',
-			'properties'           => array(
-				'id'               => array(
-					'description'  => __( 'Unique identifier for the resource.' ),
-					'type'         => 'integer',
-					'context'      => array( 'view', 'embed', 'edit' ),
-					'readonly'     => true,
-					'required'     => true,
+		$schema   = array(
+			'$schema'    => 'http://json-schema.org/draft-04/schema#',
+			'title'      => $this->coauthor_taxonomy,
+			'type'       => 'object',
+			'properties' => array(
+				'id'          => array(
+					'description' => __( 'Unique identifier for the resource.' ),
+					'type'        => 'integer',
+					'context'     => array( 'view', 'embed', 'edit' ),
+					'readonly'    => true,
+					'required'    => true,
 				),
-				'count'            => array(
-					'description'  => __( 'Number of published posts for the resource.' ),
-					'type'         => 'integer',
-					'context'      => array( 'view', 'edit' ),
-					'readonly'     => true,
+				'count'       => array(
+					'description' => __( 'Number of published posts for the resource.' ),
+					'type'        => 'integer',
+					'context'     => array( 'view', 'edit' ),
+					'readonly'    => true,
 				),
-				'description'      => array(
-					'description'  => __( 'HTML description of the resource.' ),
-					'type'         => 'string',
-					'context'      => array( 'view', 'edit' ),
-					'readonly'     => true,
+				'description' => array(
+					'description' => __( 'HTML description of the resource.' ),
+					'type'        => 'string',
+					'context'     => array( 'view', 'edit' ),
+					'readonly'    => true,
 				),
-				'link'             => array(
-					'description'  => __( 'URL to the resource.' ),
-					'type'         => 'string',
-					'format'       => 'uri',
-					'context'      => array( 'view', 'embed', 'edit' ),
-					'readonly'     => true,
+				'link'        => array(
+					'description' => __( 'URL to the resource.' ),
+					'type'        => 'string',
+					'format'      => 'uri',
+					'context'     => array( 'view', 'embed', 'edit' ),
+					'readonly'    => true,
 				),
-				'name'             => array(
-					'description'  => __( 'HTML title for the resource.' ),
-					'type'         => 'string',
-					'context'      => array( 'view', 'embed', 'edit' ),
-					'readonly'     => true,
+				'name'        => array(
+					'description' => __( 'HTML title for the resource.' ),
+					'type'        => 'string',
+					'context'     => array( 'view', 'embed', 'edit' ),
+					'readonly'    => true,
 				),
-				'slug'             => array(
-					'description'  => __( 'An alphanumeric identifier for the resource unique to its type.' ),
-					'type'         => 'string',
-					'context'      => array( 'view', 'embed', 'edit' ),
-					'readonly'     => true,
+				'slug'        => array(
+					'description' => __( 'An alphanumeric identifier for the resource unique to its type.' ),
+					'type'        => 'string',
+					'context'     => array( 'view', 'embed', 'edit' ),
+					'readonly'    => true,
 				),
-				'taxonomy'         => array(
-					'description'  => __( 'Type attribution for the resource.' ),
-					'type'         => 'string',
-					'enum'         => array_keys( get_taxonomies() ),
-					'context'      => array( 'view', 'embed', 'edit' ),
-					'readonly'     => true,
+				'taxonomy'    => array(
+					'description' => __( 'Type attribution for the resource.' ),
+					'type'        => 'string',
+					'enum'        => array_keys( get_taxonomies() ),
+					'context'     => array( 'view', 'embed', 'edit' ),
+					'readonly'    => true,
 				),
 			),
 		);
 		$taxonomy = get_taxonomy( $this->coauthor_taxonomy );
 		if ( $taxonomy->hierarchical ) {
 			$schema['properties']['parent'] = array(
-				'description'  => __( 'The id for the parent of the resource.' ),
-				'type'         => 'integer',
-				'context'      => array( 'view', 'edit' ),
+				'description' => __( 'The id for the parent of the resource.' ),
+				'type'        => 'integer',
+				'context'     => array( 'view', 'edit' ),
 			);
 		}
-		return $this->add_additional_fields_schema( $schema );
-	}
 
-	/**
-	 * Get the query params for collections
-	 *
-	 * @return array
-	 */
-	public function get_collection_params() {
-		$query_params = parent::get_collection_params();
-		$query_params['context']['default'] = 'view';
-		return $query_params;
+		return $this->add_additional_fields_schema( $schema );
 	}
 }

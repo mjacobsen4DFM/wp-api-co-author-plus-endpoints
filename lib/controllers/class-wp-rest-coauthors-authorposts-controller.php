@@ -47,15 +47,17 @@ abstract class WP_REST_CoAuthors_AuthorPosts_Controller extends WP_REST_Controll
 	public function __construct() {
 		if ( empty( $this->parent_type ) ) {
 			_doing_it_wrong( 'WP_REST_Meta_Controller::__construct', __( 'The object type must be overridden' ), 'WPAPI-2.0' );
+
 			return;
 		}
 		if ( empty( $this->parent_base ) ) {
 			_doing_it_wrong( 'WP_REST_Meta_Controller::__construct', __( 'The parent base must be overridden' ), 'WPAPI-2.0' );
+
 			return;
 		}
 
 		if ( class_exists( 'WP_REST_CoAuthors_AuthorPosts' ) ) {
-			$this->AuthorPost = new WP_REST_CoAuthors_AuthorPosts( $this->namespace, $this->rest_base, $this->parent_base, $this->parent_type );
+			$this->AuthorPost         = new WP_REST_CoAuthors_AuthorPosts( $this->namespace, $this->rest_base, $this->parent_base, $this->parent_type );
 			$this->coauthor_post_type = $this->AuthorPost->coauthor_post_type;
 		}
 
@@ -136,6 +138,18 @@ abstract class WP_REST_CoAuthors_AuthorPosts_Controller extends WP_REST_Controll
 	}
 
 	/**
+	 * Get the query params for collections
+	 *
+	 * @return array
+	 */
+	public function get_collection_params() {
+		$query_params                       = parent::get_collection_params();
+		$query_params['context']['default'] = 'view';
+
+		return $query_params;
+	}
+
+	/**
 	 * Get the Post's schema, conforming to JSON Schema.
 	 *
 	 * @return array
@@ -150,19 +164,19 @@ abstract class WP_REST_CoAuthors_AuthorPosts_Controller extends WP_REST_Controll
 			 * Base properties for every Post.
 			 */
 			'properties' => array(
-				'date'            => array(
+				'date'         => array(
 					'description' => __( "The date the object was published, in the site's timezone." ),
 					'type'        => 'string',
 					'format'      => 'date-time',
 					'context'     => array( 'view', 'edit', 'embed' ),
 				),
-				'date_gmt'        => array(
+				'date_gmt'     => array(
 					'description' => __( 'The date the object was published, as GMT.' ),
 					'type'        => 'string',
 					'format'      => 'date-time',
 					'context'     => array( 'view', 'edit' ),
 				),
-				'guid'            => array(
+				'guid'         => array(
 					'description' => __( 'The globally unique identifier for the object.' ),
 					'type'        => 'object',
 					'context'     => array( 'view', 'edit' ),
@@ -180,39 +194,39 @@ abstract class WP_REST_CoAuthors_AuthorPosts_Controller extends WP_REST_Controll
 						),
 					),
 				),
-				'id'              => array(
+				'id'           => array(
 					'description' => __( 'Unique identifier for the object.' ),
 					'type'        => 'integer',
 					'context'     => array( 'view', 'edit', 'embed' ),
 					'readonly'    => true,
 				),
-				'link'            => array(
+				'link'         => array(
 					'description' => __( 'URL to the object.' ),
 					'type'        => 'string',
 					'format'      => 'uri',
 					'context'     => array( 'view', 'edit', 'embed' ),
 					'readonly'    => true,
 				),
-				'modified'        => array(
+				'modified'     => array(
 					'description' => __( "The date the object was last modified, in the site's timezone." ),
 					'type'        => 'string',
 					'format'      => 'date-time',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
-				'modified_gmt'    => array(
+				'modified_gmt' => array(
 					'description' => __( 'The date the object was last modified, as GMT.' ),
 					'type'        => 'string',
 					'format'      => 'date-time',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
-				'password'        => array(
+				'password'     => array(
 					'description' => __( 'A password to protect access to the post.' ),
 					'type'        => 'string',
 					'context'     => array( 'edit' ),
 				),
-				'slug'            => array(
+				'slug'         => array(
 					'description' => __( 'An alphanumeric identifier for the object unique to its type.' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit', 'embed' ),
@@ -220,13 +234,13 @@ abstract class WP_REST_CoAuthors_AuthorPosts_Controller extends WP_REST_Controll
 						'sanitize_callback' => 'sanitize_title',
 					),
 				),
-				'status'          => array(
+				'status'       => array(
 					'description' => __( 'A named status for the object.' ),
 					'type'        => 'string',
 					'enum'        => array_keys( get_post_stati( array( 'internal' => false ) ) ),
 					'context'     => array( 'edit' ),
 				),
-				'type'            => array(
+				'type'         => array(
 					'description' => __( 'Type of Post for the object.' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit', 'embed' ),
@@ -255,8 +269,8 @@ abstract class WP_REST_CoAuthors_AuthorPosts_Controller extends WP_REST_Controll
 			'page-attributes',
 			'post-formats',
 		);
-		$fixed_schemas = array(
-			'post' => array(
+		$fixed_schemas        = array(
+			'post'       => array(
 				'title',
 				'editor',
 				'author',
@@ -266,7 +280,7 @@ abstract class WP_REST_CoAuthors_AuthorPosts_Controller extends WP_REST_Controll
 				'revisions',
 				'post-formats',
 			),
-			'page' => array(
+			'page'       => array(
 				'title',
 				'editor',
 				'author',
@@ -298,7 +312,7 @@ abstract class WP_REST_CoAuthors_AuthorPosts_Controller extends WP_REST_Controll
 						'type'        => 'object',
 						'context'     => array( 'view', 'edit', 'embed' ),
 						'properties'  => array(
-							'raw' => array(
+							'raw'      => array(
 								'description' => __( 'Title for the object, as it exists in the database.' ),
 								'type'        => 'string',
 								'context'     => array( 'edit' ),
@@ -318,7 +332,7 @@ abstract class WP_REST_CoAuthors_AuthorPosts_Controller extends WP_REST_Controll
 						'type'        => 'object',
 						'context'     => array( 'view', 'edit' ),
 						'properties'  => array(
-							'raw' => array(
+							'raw'      => array(
 								'description' => __( 'Content for the object, as it exists in the database.' ),
 								'type'        => 'string',
 								'context'     => array( 'edit' ),
@@ -346,7 +360,7 @@ abstract class WP_REST_CoAuthors_AuthorPosts_Controller extends WP_REST_Controll
 						'type'        => 'object',
 						'context'     => array( 'view', 'edit', 'embed' ),
 						'properties'  => array(
-							'raw' => array(
+							'raw'      => array(
 								'description' => __( 'Excerpt for the object, as it exists in the database.' ),
 								'type'        => 'string',
 								'context'     => array( 'edit' ),
@@ -375,7 +389,7 @@ abstract class WP_REST_CoAuthors_AuthorPosts_Controller extends WP_REST_Controll
 						'enum'        => array( 'open', 'closed' ),
 						'context'     => array( 'view', 'edit' ),
 					);
-					$schema['properties']['ping_status'] = array(
+					$schema['properties']['ping_status']    = array(
 						'description' => __( 'Whether or not the object can be pinged.' ),
 						'type'        => 'string',
 						'enum'        => array( 'open', 'closed' ),
@@ -422,7 +436,7 @@ abstract class WP_REST_CoAuthors_AuthorPosts_Controller extends WP_REST_Controll
 
 		$taxonomies = wp_list_filter( get_object_taxonomies( $this->coauthor_post_type, 'objects' ), array( 'show_in_rest' => true ) );
 		foreach ( $taxonomies as $taxonomy ) {
-			$base = ! empty( $taxonomy->rest_base ) ? $taxonomy->rest_base : $taxonomy->name;
+			$base                          = ! empty( $taxonomy->rest_base ) ? $taxonomy->rest_base : $taxonomy->name;
 			$schema['properties'][ $base ] = array(
 				'description' => sprintf( __( 'The terms assigned to the object in the %s taxonomy.' ), $taxonomy->name ),
 				'type'        => 'array',
@@ -431,16 +445,5 @@ abstract class WP_REST_CoAuthors_AuthorPosts_Controller extends WP_REST_Controll
 		}
 
 		return $this->add_additional_fields_schema( $schema );
-	}
-
-	/**
-	 * Get the query params for collections
-	 *
-	 * @return array
-	 */
-	public function get_collection_params() {
-		$query_params = parent::get_collection_params();
-		$query_params['context']['default'] = 'view';
-		return $query_params;
 	}
 }

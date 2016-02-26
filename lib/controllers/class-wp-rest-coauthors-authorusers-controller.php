@@ -47,15 +47,17 @@ abstract class WP_REST_CoAuthors_AuthorUsers_Controller extends WP_REST_Controll
 	public function __construct() {
 		if ( empty( $this->parent_type ) ) {
 			_doing_it_wrong( 'WP_REST_Meta_Controller::__construct', __( 'The object type must be overridden' ), 'WPAPI-2.0' );
+
 			return;
 		}
 		if ( empty( $this->parent_base ) ) {
 			_doing_it_wrong( 'WP_REST_Meta_Controller::__construct', __( 'The parent base must be overridden' ), 'WPAPI-2.0' );
+
 			return;
 		}
 
 		if ( class_exists( 'WP_REST_CoAuthors_AuthorUsers' ) ) {
-			$this->AuthorUser = new WP_REST_CoAuthors_AuthorUsers( $this->namespace, $this->rest_base, $this->parent_base, $this->parent_type );
+			$this->AuthorUser         = new WP_REST_CoAuthors_AuthorUsers( $this->namespace, $this->rest_base, $this->parent_base, $this->parent_type );
 			$this->coauthor_post_type = $this->AuthorUser->coauthor_post_type;
 		}
 	}
@@ -113,6 +115,18 @@ abstract class WP_REST_CoAuthors_AuthorUsers_Controller extends WP_REST_Controll
 	}
 
 	/**
+	 * Get the query params for collections
+	 *
+	 * @return array
+	 */
+	public function get_collection_params() {
+		$query_params                       = parent::get_collection_params();
+		$query_params['context']['default'] = 'view';
+
+		return $query_params;
+	}
+
+	/**
 	 * Get the User's schema, conforming to JSON Schema
 	 *
 	 * @return array
@@ -124,30 +138,24 @@ abstract class WP_REST_CoAuthors_AuthorUsers_Controller extends WP_REST_Controll
 			'title'      => 'user',
 			'type'       => 'object',
 			'properties' => array(
-				'id'          => array(
+				'id'                 => array(
 					'description' => __( 'Unique identifier for the resource.' ),
 					'type'        => 'integer',
 					'context'     => array( 'embed', 'view', 'edit' ),
 					'readonly'    => true,
 				),
-				'username'    => array(
+				'username'           => array(
 					'description' => __( 'Login name for the resource.' ),
 					'type'        => 'string',
 					'context'     => array( 'edit' ),
 					'required'    => true,
-					'arg_options' => array(
-						'sanitize_callback' => 'sanitize_user',
-					),
 				),
-				'name'        => array(
+				'name'               => array(
 					'description' => __( 'Display name for the resource.' ),
 					'type'        => 'string',
 					'context'     => array( 'embed', 'view', 'edit' ),
-					'arg_options' => array(
-						'sanitize_callback' => 'sanitize_text_field',
-					),
 				),
-				'first_name'  => array(
+				'first_name'         => array(
 					'description' => __( 'First name for the resource.' ),
 					'type'        => 'string',
 					'context'     => array( 'edit' ),
@@ -155,43 +163,37 @@ abstract class WP_REST_CoAuthors_AuthorUsers_Controller extends WP_REST_Controll
 						'sanitize_callback' => 'sanitize_text_field',
 					),
 				),
-				'last_name'   => array(
+				'last_name'          => array(
 					'description' => __( 'Last name for the resource.' ),
 					'type'        => 'string',
 					'context'     => array( 'edit' ),
-					'arg_options' => array(
-						'sanitize_callback' => 'sanitize_text_field',
-					),
 				),
-				'email'       => array(
+				'email'              => array(
 					'description' => __( 'The email address for the resource.' ),
 					'type'        => 'string',
 					'format'      => 'email',
 					'context'     => array( 'edit' ),
 					'required'    => true,
 				),
-				'url'         => array(
+				'url'                => array(
 					'description' => __( 'URL of the resource.' ),
 					'type'        => 'string',
 					'format'      => 'uri',
 					'context'     => array( 'embed', 'view', 'edit' ),
 				),
-				'description' => array(
+				'description'        => array(
 					'description' => __( 'Description of the resource.' ),
 					'type'        => 'string',
-					'context'     => array( 'embed', 'view', 'edit' ),
-					'arg_options' => array(
-						'sanitize_callback' => 'wp_filter_post_kses',
-					),
+					'context'     => array( 'embed', 'view', 'edit' )
 				),
-				'link'        => array(
+				'link'               => array(
 					'description' => __( 'Author URL to the resource.' ),
 					'type'        => 'string',
 					'format'      => 'uri',
 					'context'     => array( 'embed', 'view', 'edit' ),
 					'readonly'    => true,
 				),
-				'nickname'    => array(
+				'nickname'           => array(
 					'description' => __( 'The nickname for the resource.' ),
 					'type'        => 'string',
 					'context'     => array( 'edit' ),
@@ -199,26 +201,23 @@ abstract class WP_REST_CoAuthors_AuthorUsers_Controller extends WP_REST_Controll
 						'sanitize_callback' => 'sanitize_text_field',
 					),
 				),
-				'slug'        => array(
+				'slug'               => array(
 					'description' => __( 'An alphanumeric identifier for the resource.' ),
 					'type'        => 'string',
 					'context'     => array( 'embed', 'view', 'edit' ),
-					'arg_options' => array(
-						'sanitize_callback' => 'sanitize_title',
-					),
 				),
-				'registered_date' => array(
+				'registered_date'    => array(
 					'description' => __( 'Registration date for the resource.' ),
 					'type'        => 'date-time',
 					'context'     => array( 'edit' ),
 					'readonly'    => true,
 				),
-				'roles'           => array(
+				'roles'              => array(
 					'description' => __( 'Roles assigned to the resource.' ),
 					'type'        => 'array',
 					'context'     => array( 'edit' ),
 				),
-				'capabilities'    => array(
+				'capabilities'       => array(
 					'description' => __( 'All capabilities assigned to the resource.' ),
 					'type'        => 'object',
 					'context'     => array( 'edit' ),
@@ -245,7 +244,7 @@ abstract class WP_REST_CoAuthors_AuthorUsers_Controller extends WP_REST_Controll
 				);
 			}
 
-			$schema['properties']['avatar_urls']  = array(
+			$schema['properties']['avatar_urls'] = array(
 				'description' => __( 'Avatar URLs for the resource.' ),
 				'type'        => 'object',
 				'context'     => array( 'embed', 'view', 'edit' ),
@@ -256,16 +255,5 @@ abstract class WP_REST_CoAuthors_AuthorUsers_Controller extends WP_REST_Controll
 		}
 
 		return $this->add_additional_fields_schema( $schema );
-	}
-
-	/**
-	 * Get the query params for collections
-	 *
-	 * @return array
-	 */
-	public function get_collection_params() {
-		$query_params = parent::get_collection_params();
-		$query_params['context']['default'] = 'view';
-		return $query_params;
 	}
 }

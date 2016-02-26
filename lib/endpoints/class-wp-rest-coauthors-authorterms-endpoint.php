@@ -8,7 +8,7 @@
  * CoAuthors endpoint class.
  */
 
-if ( !class_exists( 'WP_REST_CoAuthors_AuthorTerms_Controller' ) ) {
+if ( ! class_exists( 'WP_REST_CoAuthors_AuthorTerms_Controller' ) ) {
 	require_once dirname( __FILE__ ) . '/../controllers/class-wp-rest-coauthors-authorterms-controller.php';
 }
 
@@ -47,24 +47,36 @@ class WP_REST_CoAuthors_AuthorTerms_Endpoint extends WP_REST_CoAuthors_AuthorTer
 	 * @param $parent_post_type
 	 */
 	public function __construct( $parent_post_type ) {
-		$this->parent_type = 'CoAuthors';
-		$this->parent_post_type = $parent_post_type;
+		$this->parent_type       = 'CoAuthors';
+		$this->parent_post_type  = $parent_post_type;
 		$this->parent_controller = new WP_REST_Posts_Controller( $this->parent_post_type );
-		$obj = get_post_type_object( $this->parent_post_type );
-		$this->parent_base = ! empty( $obj->rest_base ) ? $obj->rest_base : $obj->name;
-		$this->namespace = 'co-authors/v1';
-		$this->rest_base = 'author-terms';
+		$obj                     = get_post_type_object( $this->parent_post_type );
+		$this->parent_base       = ! empty( $obj->rest_base ) ? $obj->rest_base : $obj->name;
+		$this->namespace         = 'co-authors/v1';
+		$this->rest_base         = 'author-terms';
 		parent::__construct();
+	}
+
+	/**
+	 * Check if a given request has access to get a specific authors entry for a post.
+	 *
+	 * @param WP_REST_Request $request Full data about the request.
+	 *
+	 * @return boolean|WP_Error
+	 */
+	public function get_item_permissions_check( $request ) {
+		return $this->get_items_permissions_check( $request );
 	}
 
 	/**
 	 * Check if a given request has access to get authors for a post.
 	 *
 	 * @param WP_REST_Request $request Full data about the request.
+	 *
 	 * @return WP_Error|boolean
 	 */
 	public function get_items_permissions_check( $request ) {
-		if ( ! empty( $request['parent_id'] )) {
+		if ( ! empty( $request['parent_id'] ) ) {
 			$parent = get_post( (int) $request['parent_id'] );
 
 			if ( empty( $parent ) || empty( $parent->ID ) ) {
@@ -82,24 +94,15 @@ class WP_REST_CoAuthors_AuthorTerms_Endpoint extends WP_REST_CoAuthors_AuthorTer
 
 			return true;
 		}
-		
-		return true;
-	}
 
-	/**
-	 * Check if a given request has access to get a specific authors entry for a post.
-	 *
-	 * @param WP_REST_Request $request Full data about the request.
-	 * @return boolean|WP_Error
-	 */
-	public function get_item_permissions_check( $request ) {
-		return $this->get_items_permissions_check( $request );
+		return true;
 	}
 
 	/**
 	 * Check if a given request has access to create a authors entry for a post.
 	 *
 	 * @param WP_REST_Request $request Full data about the request.
+	 *
 	 * @return boolean
 	 */
 	public function create_item_permissions_check( $request ) {
@@ -110,6 +113,7 @@ class WP_REST_CoAuthors_AuthorTerms_Endpoint extends WP_REST_CoAuthors_AuthorTer
 	 * Check if a given request has access to update a authors entry for a post.
 	 *
 	 * @param WP_REST_Request $request Full data about the request.
+	 *
 	 * @return boolean
 	 */
 	public function update_item_permissions_check( $request ) {
@@ -120,6 +124,7 @@ class WP_REST_CoAuthors_AuthorTerms_Endpoint extends WP_REST_CoAuthors_AuthorTer
 	 * Check if a given request has access to delete authors for a post.
 	 *
 	 * @param  WP_REST_Request $request Full details about the request.
+	 *
 	 * @return boolean, always false: delete is not supported
 	 */
 	public function delete_item_permissions_check( $request ) {
