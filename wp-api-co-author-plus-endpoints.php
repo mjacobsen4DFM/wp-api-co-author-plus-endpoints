@@ -4,7 +4,7 @@
  * Description: WP REST API companion plugin for Co-Authors Plus endpoints
  * Author: Michael Jacobsen
  * Author URI: https://mjacobsen4dfm.wordpress.com/
- * Version: 0.0.3
+ * Version: 0.1.0
  * Plugin URI: https://github.com/mjacobsen4DFM/wp-api-co-author-plus-endpoints
  * License: GPL2+
  */

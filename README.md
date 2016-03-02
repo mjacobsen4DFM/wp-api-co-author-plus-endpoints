@@ -49,3 +49,6 @@ https://github.com/Automattic/Co-Authors-Plus
 
 ### 0.0.3 (February 25, 2016) ###
 * Muti-author feature release.
+
+### 0.1.0 (March 02, 2016) ###
+* Production Release candidate
