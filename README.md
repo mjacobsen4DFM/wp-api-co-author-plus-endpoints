@@ -19,7 +19,7 @@
 
 **WP REST API companion plugin for Co-Authors Plus endpoints.**
 
-This plugin can query for author data and can add authors via the author term.
+This plugin utilizes WP-API to query for Co-Authors Plus data and add authors to a post via the author term.
 
 
 
