@@ -183,7 +183,7 @@ class WP_REST_CoAuthors_AuthorTerms extends WP_REST_Controller {
 
 			if ( is_wp_error( $response ) ) {
 				// There was an error somewhere and the terms couldn't be retrieved.
-				return new WP_Error( 'create_item', __( 'Author was added; but it could not be retrieved via get_item().' ), array( 'status' => 404 ) );
+				return new WP_Error( 'create_item', __( 'Author was added; but it could not be retrieved via get_items().' ), array( 'status' => 404 ) );
 			}
 
 			$response->set_status( 201 );
@@ -231,10 +231,20 @@ class WP_REST_CoAuthors_AuthorTerms extends WP_REST_Controller {
 			$terms = get_terms( $this->coauthor_taxonomy );
 		}
 
+		if ( is_wp_error( $terms ) ) {
+			//Something bad happened, throw the error
+			return $terms;
+		}
+
+		if ( empty( $terms ) ) {
+			//Nothing was returned, that shouldn't happen unless a requested post doesn't have any guest-authors
+			return new WP_Error( 'rest_authors_get_term', __( 'No terms returned.' ), array( 'status' => 404 ) );
+		}
+
 		foreach ( $terms as $term ) {
 
-			if ( ( is_array( $term_ids ) && in_array( $term->id, $term_ids ) || is_null( $term_ids ) ) ) {
-				//if a list of id's were requested, check to see if they are in the list
+			if ( ( is_array( $term_ids ) && in_array( $term->term_id, $term_ids ) ) || is_null( $term_ids ) ) {
+				//If a list of id's was requested, check to see if they are in the list
 				//Otherwise, $term_ids should be null, so return all terms
 				$term_item = $this->prepare_item_for_response( $term, $request );
 
